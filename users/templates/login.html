@@ -1,0 +1,24 @@
+
+{% extends 'base.html' %}
+{% block title %}Вход пользователя{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="col-1">
+        </div>
+        <div class="col-12">
+            <h2>Вход</h2>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Войти</button>
+                <a role="button" class="btn btn-secondary" href="{% url 'users:password_reset' %}">Восстановить пароль</a>
+            </form>
+        </div>
+        <div class="col-1">
+        </div>
+        {% include 'footer.html' %}
+    </div>
+
+{% endblock %}

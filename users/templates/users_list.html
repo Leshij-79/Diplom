@@ -1,0 +1,27 @@
+
+{% extends 'base.html' %}
+{% block title %}Рассылки - Пользователи{% endblock %}
+
+{% block content %}
+
+    <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+        <h1 class="display-4">Рассылки</h1>
+        <p class="lead">Перечень пользователей</p>
+    </div>
+
+    <div class="container">
+        <div class="row text-center">
+            {% if object_list %}
+                {% for user in object_list %}
+                    <div class="col-10">
+                        <li><a class="text-muted" href="{% url 'users:user_detail' user.pk %}">{{ user }}</a></li>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <h1 class="display-4">Нет получателей</h1>
+            {% endif %}
+        </div>
+        {% include 'footer.html' %}
+    </div>
+
+{% endblock %}

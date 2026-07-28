@@ -1,0 +1,35 @@
+
+{% extends 'base.html' %}
+{% block title %}Пользователь - {{ user_detail.username }}{% endblock %}
+
+{% block content %}
+
+    <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+        <h1 class="display-4">Пользователи</h1>
+    </div>
+
+    <div class="container">
+        <div class="col-4">
+        </div>
+        <div class="col-4">
+            <div class="row text-center">
+                <form>
+                    <h1>Имя пользователя:</h1>
+                    <h2 class="my-0 font-weight-normal">{{ user_detail.username }}</h2>
+                    <h1>Email</h1>
+                    <h2>{{ user_detail.email }}</h2>
+                    {% if user_detail.is_active %}
+                        <a role="button" class="btn btn-primary" href="{% url 'users:user_diactive' user_detail.pk %}">Диактивировать</a>
+                    {% else %}
+                        <a role="button" class="btn btn-primary" href="{% url 'users:user_active' user_detail.pk %}">Активировать</a>
+                    {% endif %}
+                    <a role="button" class="btn btn-secondary" href="{% url 'users:users_list' %}">Назад</a>
+                </form>
+            </div>
+        </div>
+        <div class="col-4">
+        </div>
+        {% include 'footer.html' %}
+    </div>
+
+{% endblock %}

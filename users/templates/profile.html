@@ -1,0 +1,25 @@
+
+{% extends 'base.html' %}
+{% block title %}Профиль пользователя{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="col-1">
+        </div>
+        <div class="col-12">
+            <div class="row text-center">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                    <a role="button" class="btn btn-secondary" href="{% url 'sending_mail:mailing_list' %}">Назад</a>
+                </form>
+            </div>
+        </div>
+        <div class="col-1">
+        </div>
+        {% include 'footer.html' %}
+    </div>
+
+{% endblock %}
