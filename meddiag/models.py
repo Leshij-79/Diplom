@@ -1,5 +1,7 @@
 from django.db import models
 
+from users.models import CustomUser
+
 
 class Direction(models.Model):
     title = models.CharField(
@@ -180,3 +182,46 @@ class Appointment(models.Model):
         ("rendered", "Оказана"),
         ("cancel", "Отменена"),
     ]
+
+    patient = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="patient",
+        verbose_name="Пациент",
+        help_text="Выберите пациента",
+    )
+
+    doctor = models.ForeignKey(
+        Doctors,
+        on_delete=models.CASCADE,
+        related_name="doctor",
+        verbose_name="Врач",
+        help_text="Выберите врача",
+    )
+
+    services = models.ForeignKey(
+        Services,
+        related_name="services",
+        verbose_name="Услуга",
+        help_text="Выберите услугу",
+    )
+
+    status = models.CharField(
+        max_length=8,
+        choices=STATUS,
+        default="active",
+        verbose_name="Статус услуги",
+    )
+
+    datetime = models.DateTimeField(
+        verbose_name="Время оказания услуги",
+        help_text="Укажите время оказания услуги",
+    )
+
+    class Meta:
+        verbose_name = "Запись"
+        verbose_name_plural = "Записи"
+        ordering = ["patient", "services"]
+
+    def __str__(self):
+        return f"{self.patient} {self.services} {self.datetime} {self.status}"
