@@ -49,8 +49,6 @@ class CustomUserCreationForm(StyleFormMixin, UserCreationForm):
             "last_name",
             "email",
             "phone_number",
-            "avatar",
-            "country",
         )
 
     def clean_phone_number(self):
@@ -70,8 +68,6 @@ class CustomUserProfileForm(StyleFormMixin, ModelForm):
             "first_name",
             "last_name",
             "phone_number",
-            "country",
-            "avatar",
         )
 
 

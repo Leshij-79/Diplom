@@ -4,6 +4,9 @@ from users.models import CustomUser
 
 
 class Direction(models.Model):
+    """
+    Модель направлений диагностики для группировки услуг по диагностике
+    """
     title = models.CharField(
         max_length=50,
         verbose_name="Краткое наименование направления диагностики",
@@ -26,6 +29,9 @@ class Direction(models.Model):
 
 
 class Services(models.Model):
+    """
+    Модель услуг по диагностике
+    """
     title = models.CharField(
         max_length=50,
         verbose_name="Краткое наименование услуги",
@@ -97,6 +103,9 @@ class Services(models.Model):
 #
 
 class Doctors(models.Model):
+    """
+    Модель по врачам с указанием их специализации, стажа и направления диагностики
+    """
     STATUS_CATEGORY = [
         ("highest", "Высшая категория"),
         ("first", "Первая категория"),
@@ -177,6 +186,9 @@ class Doctors(models.Model):
 
 
 class Appointment(models.Model):
+    """
+    Модель записи на приём пациента
+    """
     STATUS = [
         ("active", "Активная"),
         ("rendered", "Оказана"),
@@ -201,6 +213,7 @@ class Appointment(models.Model):
 
     services = models.ForeignKey(
         Services,
+        on_delete=models.CASCADE,
         related_name="services",
         verbose_name="Услуга",
         help_text="Выберите услугу",

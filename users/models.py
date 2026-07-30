@@ -23,6 +23,7 @@ class CustomUser(AbstractUser):
 
     middle_name = models.CharField(
         max_length=150,
+        default="",
         verbose_name="Отчество",
         help_text="Укажите отчество",
     )
