@@ -36,17 +36,14 @@ class CustomPasswordSetForm(StyleFormMixin, SetPasswordForm):
         )
 
 
-class CustomPasswordChangeForm(StyleFormMixin, PasswordChangeForm):
-    pass
-
-
 class CustomUserCreationForm(StyleFormMixin, UserCreationForm):
     class Meta:
         model = CustomUser
         fields = (
             "username",
-            "first_name",
             "last_name",
+            "first_name",
+            "middle_name",
             "email",
             "phone_number",
         )
@@ -65,8 +62,9 @@ class CustomUserProfileForm(StyleFormMixin, ModelForm):
         model = CustomUser
         fields = (
             "username",
-            "first_name",
             "last_name",
+            "first_name",
+            "middle_name",
             "phone_number",
         )
 

@@ -13,7 +13,7 @@
                     {% csrf_token %}
                     {{ form.as_p }}
                     <button type="submit" class="btn btn-primary">Сохранить</button>
-                    <a role="button" class="btn btn-secondary" href="{% url 'sending_mail:mailing_list' %}">Назад</a>
+                    <a role="button" class="btn btn-secondary" href="{% url 'meddiag:mailing_list' %}">Назад</a>
                 </form>
             </div>
         </div>

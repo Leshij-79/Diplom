@@ -18,13 +18,13 @@ from users.models import CustomUser
 
 def UserLogoutView(request):
     logout(request)
-    return redirect("sending_mail:index")
+    return redirect("meddiag:index")
 
 
 class UserLoginView(LoginView):
     form_class = CustomAuthenticationForm
     template_name = "login.html"
-    success_url = reverse_lazy("sending_mail:index")
+    success_url = reverse_lazy("meddiag:index")
 
 
 def email_verification(request, token):
@@ -39,7 +39,7 @@ class RegisterView(FormView):
     model = CustomUser
     template_name = "register.html"
     form_class = CustomUserCreationForm
-    success_url = reverse_lazy("sending_mail:index")
+    success_url = reverse_lazy("meddiag:index")
 
     def form_valid(self, form):
         user = form.save()
@@ -65,7 +65,7 @@ class UserProfileView(UpdateView):
     model = CustomUser
     template_name = "profile.html"
     form_class = CustomUserProfileForm
-    success_url = reverse_lazy("sending_mail:index")
+    success_url = reverse_lazy("meddiag:index")
 
     def get_object(self):
         return self.request.user
@@ -74,7 +74,7 @@ class UserProfileView(UpdateView):
 class UserPasswordResetView(FormView):
     template_name = "password_reset.html"
     form_class = CustomPasswordResetForm
-    success_url = reverse_lazy("sending_mail:index")
+    success_url = reverse_lazy("meddiag:index")
 
     def form_valid(self, form):
         email = form.cleaned_data["email"]
@@ -117,7 +117,7 @@ class UsersListView(LoginRequiredMixin, ListView):
     template_name = "users_list.html"
     form_class = UsersListForm
     context_object_name = "objects_list"
-    success_url = reverse_lazy("sending_mail:index")
+    success_url = reverse_lazy("meddiag:index")
 
     def get_queryset(self):
         queryset = CustomUser.objects.all()

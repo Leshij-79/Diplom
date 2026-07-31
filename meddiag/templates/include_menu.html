@@ -1,0 +1,40 @@
+<!-- Навигационное меню -->
+<nav class="nav-menu">
+    <div class="nav-container">
+        <ul class="nav-list">
+            <li><a href="/" class="active">Главная</a></li>
+            <li><a href="/about">О компании</a></li>
+            <li><a href="/services">Услуги</a></li>
+            <li><a href="/doctors">Врачи</a></li>
+            <li><a href="/contacts">Контакты</a></li>
+
+            <!-- Элементы для авторизованных пользователей -->
+            <li class="auth-required" style="display: none;">
+                <a href="/profile">Профиль пользователя</a>
+            </li>
+            <li class="auth-required" style="display: none;">
+                <a href="/personal">Личный кабинет</a>
+            </li>
+
+            <!-- Ссылка на админку (только для Manager) -->
+            <li class="auth-required admin-link" style="display: none;">
+                <a href="/admin" style="background: #e67e22;">Админка</a>
+            </li>
+            {% if user.is_authenticated %}
+                <li class="auth-required user-actions" style="display: none;">
+                    <a href="users/logout" class="btn-logout">Выход</a>
+                </li>
+            {% else %}
+                <li class="auth-required user-actions" style="display: none;">
+                    <a href="users/login" class="btn-logout">Вход</a>
+                </li>
+            {% endif %}
+
+            <!-- Вход и регистрация для гостей -->
+            <li class="guest-only user-actions">
+                <a href="/login">Вход</a>
+                <a href="/register">Регистрация</a>
+            </li>
+        </ul>
+    </div>
+</nav>
