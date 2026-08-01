@@ -12,7 +12,6 @@ class DirectionAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
-        "pk",
         "name",
     )
 
@@ -34,7 +33,6 @@ class ServicesAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
-        "pk",
         "title",
         "name",
         "direction",
@@ -61,7 +59,6 @@ class DoctorsAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
-        "pk",
         "last_name",
         "specialization",
         "direction",
@@ -84,7 +81,6 @@ class AppointmentAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
-        "pk",
         "patient",
         "doctor",
         "services",
