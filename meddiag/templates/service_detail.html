@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}{{ service.name }} - Медицинская Диагностика{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/services.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="section service-detail-section">
+    <div class="service-detail-container">
+        <!-- Хлебные крошки -->
+        <div class="breadcrumbs">
+            <a href="{% url 'meddiag:index' %}">Главная</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="{% url 'meddiag:services_list' %}">Услуги</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>{{ service.name }}</span>
+        </div>
+
+        <!-- Заголовок услуги -->
+        <div class="service-detail-header">
+            <div class="service-detail-icon">
+                <i class="fas fa-stethoscope"></i>
+            </div>
+            <div class="service-detail-title">
+                <h2>{{ service.name }}</h2>
+                <p class="service-direction-label">
+                    <i class="fas fa-tag"></i> {{ service.direction.title }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Основная информация -->
+        <div class="service-detail-content">
+            <div class="service-detail-info">
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-ruble-sign"></i> Стоимость:</span>
+                    <span class="info-value">{{ service.price }} ₽</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-clock"></i> Длительность:</span>
+                    <span class="info-value">{{ service.duration_execution }} минут</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-tag"></i> Направление:</span>
+                    <span class="info-value">{{ service.direction.name }}</span>
+                </div>
+            </div>
+
+            <!-- Описание услуги -->
+            <div class="service-detail-description">
+                <h3>Описание услуги</h3>
+                <p>{{ service.description|linebreaks }}</p>
+            </div>
+
+            <!-- Дополнительная информация -->
+            <div class="service-detail-extra">
+                <div class="extra-block">
+                    <i class="fas fa-user-md"></i>
+                    <div>
+                        <h4>Квалифицированные специалисты</h4>
+                        <p>Наши врачи имеют многолетний опыт работы в данной области</p>
+                    </div>
+                </div>
+                <div class="extra-block">
+                    <i class="fas fa-microscope"></i>
+                    <div>
+                        <h4>Современное оборудование</h4>
+                        <p>Используем новейшее диагностическое оборудование</p>
+                    </div>
+                </div>
+                <div class="extra-block">
+                    <i class="fas fa-shield-alt"></i>
+                    <div>
+                        <h4>Безопасность и комфорт</h4>
+                        <p>Соблюдаем все стандарты безопасности и создаем комфортные условия</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопки действий -->
+            <div class="service-detail-actions">
+                <a href="{% url 'meddiag:appointment_create' %}?service={{ service.id }}" class="btn-appointment">
+                    <i class="fas fa-calendar-plus"></i> Записаться
+                </a>
+                <a href="{% url 'meddiag:services_list' %}" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Вернуться
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

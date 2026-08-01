@@ -39,36 +39,18 @@
 <section class="section" id="services">
     <h2>Наши услуги</h2>
     <div class="services-grid">
-        <div class="service-card">
-            <img src="/static/images/icon-mri.png" alt="МРТ">
-            <h3>МРТ</h3>
-            <p>Магнитно-резонансная томография всего тела и отдельных органов</p>
-        </div>
-        <div class="service-card">
-            <img src="/static/images/icon-ct.png" alt="КТ">
-            <h3>КТ</h3>
-            <p>Компьютерная томография с высоким разрешением</p>
-        </div>
-        <div class="service-card">
-            <img src="/static/images/icon-ultrasound.png" alt="УЗИ">
-            <h3>УЗИ</h3>
-            <p>Ультразвуковая диагностика всех органов и систем</p>
-        </div>
-        <div class="service-card">
-            <img src="/static/images/icon-lab.png" alt="Лаборатория">
-            <h3>Лаборатория</h3>
-            <p>Полный спектр лабораторных исследований</p>
-        </div>
-        <div class="service-card">
-            <img src="/static/images/icon-ecg.png" alt="ЭКГ">
-            <h3>ЭКГ</h3>
-            <p>Электрокардиография с расшифровкой</p>
-        </div>
-        <div class="service-card">
-            <img src="/static/images/icon-consultation.png" alt="Консультации">
-            <h3>Консультации</h3>
-            <p>Прием врачей всех специальностей</p>
-        </div>
+        {% if object_list %}
+            {% for direction in object_list %}
+                <div class="service-card">
+                    <img src="{{ direction.image }}" alt="{{ direction.title }}">
+                    <a href="{% url 'meddiag:services_list' direction.pk %}"><h3>{{ direction.title }}</h3></a>
+                    <a href="{% url 'meddiag:services_list' direction.pk %}"><p>{{ direction.name }}</p></a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <h1 class="display-4">Нет услуг</h1>
+        {% endif %}
+
     </div>
 </section>
 

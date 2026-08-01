@@ -6,11 +6,13 @@ from meddiag.models import Direction, Services, Doctors, Appointment
 @admin.register(Direction)
 class DirectionAdmin(admin.ModelAdmin):
     list_display = (
+        "pk",
         "title",
         "name",
     )
 
     list_filter = (
+        "pk",
         "name",
     )
 
@@ -22,6 +24,7 @@ class DirectionAdmin(admin.ModelAdmin):
 @admin.register(Services)
 class ServicesAdmin(admin.ModelAdmin):
     list_display = (
+        "pk",
         "title",
         "name",
         "description",
@@ -31,6 +34,7 @@ class ServicesAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
+        "pk",
         "title",
         "name",
         "direction",
@@ -45,6 +49,7 @@ class ServicesAdmin(admin.ModelAdmin):
 @admin.register(Doctors)
 class DoctorsAdmin(admin.ModelAdmin):
     list_display = (
+        "pk",
         "last_name",
         "first_name",
         "middle_name",
@@ -56,6 +61,7 @@ class DoctorsAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
+        "pk",
         "last_name",
         "specialization",
         "direction",
@@ -69,6 +75,7 @@ class DoctorsAdmin(admin.ModelAdmin):
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
     list_display = (
+        "pk",
         "patient",
         "doctor",
         "services",
@@ -77,6 +84,7 @@ class AppointmentAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
+        "pk",
         "patient",
         "doctor",
         "services",
