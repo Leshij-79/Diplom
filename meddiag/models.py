@@ -1,4 +1,5 @@
 from django.db import models
+from django_filters.utils import verbose_field_name
 
 from users.models import CustomUser
 
@@ -36,80 +37,6 @@ class Direction(models.Model):
     def __str__(self):
         return self.title
 
-
-class Services(models.Model):
-    """
-    Модель услуг по диагностике
-    """
-    title = models.CharField(
-        max_length=50,
-        verbose_name="Краткое наименование услуги",
-        help_text="Укажите краткое наименование услуги",
-    )
-
-    name = models.CharField(
-        max_length=200,
-        verbose_name="Полное наименование услуги",
-        help_text="Укажите полное наименование услуги",
-    )
-
-    description = models.TextField(
-        blank=True,
-        null=True,
-        verbose_name="Описание услуги",
-        help_text="Укажите описание медицинской услуги",
-    )
-
-    price = models.PositiveIntegerField(
-        verbose_name="Стоимость услуги",
-        help_text="Укажите стоимость медицинской услуги",
-        default=0,
-    )
-
-    duration_execution = models.PositiveIntegerField(
-        verbose_name="Продолжительность услуги в минутах",
-        help_text = "Укажите продолжительность выполнения медицинской услуги в минутах",
-        default=10,
-    )
-
-    direction = models.ForeignKey(
-        Direction,
-        on_delete=models.CASCADE,
-        related_name="direction_name",
-        verbose_name="Направление диагностики",
-        help_text="Выберите направление медицинской диагностики",
-    )
-
-    class Meta:
-        verbose_name = "Услуга"
-        verbose_name_plural = "Услуги"
-        ordering = ["title"]
-
-    def __str__(self):
-        return self.title
-
-
-# class Specialization(models.Model):
-#     title = models.CharField(
-#         max_length=50,
-#         verbose_name="Краткое наименование специальности врача",
-#         help_text="Краткое наименование специальности врача",
-#     )
-#
-#     name = models.CharField(
-#         max_length=150,
-#         verbose_name="Полное наименование специальности врача",
-#         help_text="Полное наименование специальности врача",
-#     )
-#
-#     class Meta:
-#         verbose_name = "Специальность"
-#         verbose_name_plural = "Специальности"
-#         ordering = ["title"]
-#
-#     def __str__(self):
-#         return self.title
-#
 
 class Doctors(models.Model):
     """
@@ -169,12 +96,12 @@ class Doctors(models.Model):
     )
 
     foto = models.ImageField(
-        upload_to="media/foto_doctor",
+        upload_to="foto_doctor/",
         blank=True,
         null=True,
         verbose_name="Фотография врача",
         help_text="Прикрепите фотографию врача",
-        default="media/foto_doctor/default.jpg",
+        default="foto_doctor/default.jpg",
     )
 
     direction = models.ForeignKey(
@@ -193,6 +120,87 @@ class Doctors(models.Model):
     def __str__(self):
         return f"{self.last_name} {self.first_name} {self.middle_name} {self.specialization}"
 
+
+class Services(models.Model):
+    """
+    Модель услуг по диагностике
+    """
+    title = models.CharField(
+        max_length=50,
+        verbose_name="Краткое наименование услуги",
+        help_text="Укажите краткое наименование услуги",
+    )
+
+    name = models.CharField(
+        max_length=200,
+        verbose_name="Полное наименование услуги",
+        help_text="Укажите полное наименование услуги",
+    )
+
+    description = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Описание услуги",
+        help_text="Укажите описание медицинской услуги",
+    )
+
+    price = models.PositiveIntegerField(
+        verbose_name="Стоимость услуги",
+        help_text="Укажите стоимость медицинской услуги",
+        default=0,
+    )
+
+    duration_execution = models.PositiveIntegerField(
+        verbose_name="Продолжительность услуги в минутах",
+        help_text = "Укажите продолжительность выполнения медицинской услуги в минутах",
+        default=10,
+    )
+
+    direction = models.ForeignKey(
+        Direction,
+        on_delete=models.CASCADE,
+        related_name="direction_name",
+        verbose_name="Направление диагностики",
+        help_text="Выберите направление медицинской диагностики",
+    )
+
+    doctors = models.ManyToManyField(
+        Doctors,
+        related_name="doctors_service",
+        verbose_name="Врачи оказывающие услугу",
+        help_text="Укажите врачей оказывающих услугу",
+    )
+
+    class Meta:
+        verbose_name = "Услуга"
+        verbose_name_plural = "Услуги"
+        ordering = ["title"]
+
+    def __str__(self):
+        return self.title
+
+
+# class Specialization(models.Model):
+#     title = models.CharField(
+#         max_length=50,
+#         verbose_name="Краткое наименование специальности врача",
+#         help_text="Краткое наименование специальности врача",
+#     )
+#
+#     name = models.CharField(
+#         max_length=150,
+#         verbose_name="Полное наименование специальности врача",
+#         help_text="Полное наименование специальности врача",
+#     )
+#
+#     class Meta:
+#         verbose_name = "Специальность"
+#         verbose_name_plural = "Специальности"
+#         ordering = ["title"]
+#
+#     def __str__(self):
+#         return self.title
+#
 
 class Appointment(models.Model):
     """

@@ -3,13 +3,14 @@ from django.urls import path
 
 from config import settings
 from meddiag.apps import MeddiagConfig
-from meddiag.views import IndexListView, ServicesListView
+from meddiag.views import IndexListView, ServicesListView, ServiceDetailView
 
 app_name = MeddiagConfig.name
 
 urlpatterns = [
     path("", IndexListView.as_view(), name="index"),
-    path("services/<int:pk>/", ServicesListView.as_view(), name="services_list"),
+    path("services/", ServicesListView.as_view(), name="services_list"),
+    path("service/<int:pk>/", ServiceDetailView.as_view(), name="service_detail"),
 ]
 
 if settings.DEBUG:

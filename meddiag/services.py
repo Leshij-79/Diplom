@@ -1,12 +1,12 @@
-from meddiag.models import Direction
+from meddiag.models import Direction, Services
 
 
 class ServicesServices:
     @staticmethod
-    def services_direction(direction_id):
-        direction_services = Direction.objects.filter(direction=direction_id)
+    def services_direction(service_id):
+        direction_services = Services.objects.filter(pk=service_id)
 
-        if not direction_services.exsits():
+        if not direction_services.exists():
             return None
 
         return direction_services

@@ -56,6 +56,53 @@
                 <p>{{ service.description|linebreaks }}</p>
             </div>
 
+            <!-- Врачи, оказывающие услугу -->
+            <div class="service-doctors">
+                <h3>
+                    <i class="fas fa-user-md"></i> Врачи, оказывающие услугу
+                </h3>
+
+                {% if doctors %}
+                <div class="doctors-grid">
+                    {% for doctor in doctors %}
+                    <div class="doctor-card">
+                        <div class="doctor-avatar">
+                            {% if doctor.foto and doctor.foto.url %}
+                                <img src="{{ doctor.foto.url }}"
+                                     alt="{{ doctor.last_name }}"
+                                     style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%;">
+                            {% else %}
+                                <i class="fas fa-user-circle" style="font-size: 60px; color: #ccc;"></i>
+                            {% endif %}
+                        </div>
+                        <div class="doctor-info">
+                            <h4>{{ doctor.last_name }} {{ doctor.first_name }} {{ doctor.middle_name }}</h4>
+                            <p class="doctor-specialization">
+                                <i class="fas fa-stethoscope"></i> {{ doctor.specialization }}
+                            </p>
+                            <p class="doctor-experience">
+                                <i class="fas fa-clock"></i> Стаж {{ doctor.experience }} лет
+                            </p>
+                            <p class="doctor-category">
+                                <i class="fas fa-certificate"></i>
+                                {% if doctor.category == 'highest' %}Высшая категория
+                                {% elif doctor.category == 'first' %}Первая категория
+                                {% elif doctor.category == 'second' %}Вторая категория
+                                {% else %}Без категории
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-doctors">
+                    <i class="fas fa-user-md"></i>
+                    <p>Врачи, оказывающие данную услугу, пока не назначены</p>
+                </div>
+                {% endif %}
+            </div>
+
             <!-- Дополнительная информация -->
             <div class="service-detail-extra">
                 <div class="extra-block">
@@ -83,7 +130,8 @@
 
             <!-- Кнопки действий -->
             <div class="service-detail-actions">
-                <a href="{% url 'meddiag:appointment_create' %}?service={{ service.id }}" class="btn-appointment">
+                <!-- meddiag:appointment_create -->
+                <a href="{% url 'meddiag:services_list' %}?service={{ service.id }}" class="btn-appointment">
                     <i class="fas fa-calendar-plus"></i> Записаться
                 </a>
                 <a href="{% url 'meddiag:services_list' %}" class="btn-back">

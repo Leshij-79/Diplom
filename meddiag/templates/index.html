@@ -43,8 +43,8 @@
             {% for direction in object_list %}
                 <div class="service-card">
                     <img src="{{ direction.image }}" alt="{{ direction.title }}">
-                    <a href="{% url 'meddiag:services_list' direction.pk %}"><h3>{{ direction.title }}</h3></a>
-                    <a href="{% url 'meddiag:services_list' direction.pk %}"><p>{{ direction.name }}</p></a>
+                    <a href="{% url 'meddiag:services_list' %}"><h3>{{ direction.title }}</h3></a>
+                    <a href="{% url 'meddiag:services_list' %}"><p>{{ direction.name }}</p></a>
                 </div>
             {% endfor %}
         {% else %}
