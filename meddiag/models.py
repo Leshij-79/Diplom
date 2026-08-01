@@ -19,6 +19,15 @@ class Direction(models.Model):
         help_text="Укажите полное наименование направления диагностики",
     )
 
+    image = models.ImageField(
+        upload_to="static/images",
+        blank=True,
+        null=True,
+        verbose_name="Иконка вида диагностики",
+        help_text="Прикрепите иконку вида диагностики",
+        default="media/images/default.jpg",
+    )
+
     class Meta:
         verbose_name = "Направление"
         verbose_name_plural = "Направления"

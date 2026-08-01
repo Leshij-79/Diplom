@@ -146,3 +146,7 @@ if CACHE_ENABLED:
             "LOCATION": "redis://127.0.0.1:6379/1",
         }
     }
+
+LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/users/login/'
+LOGOUT_REDIRECT_URL = '/'

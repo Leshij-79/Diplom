@@ -3,6 +3,7 @@ import secrets
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import Group
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
@@ -30,7 +31,8 @@ class UserLoginView(LoginView):
 def email_verification(request, token):
     user = get_object_or_404(CustomUser, token=token)
     user.is_active = True
-    user.groups.add("Users")
+    group, created = Group.objects.get_or_create(name="Users")
+    user.groups.add(group)
     user.save()
     return redirect(reverse("users:login"))
 
@@ -48,6 +50,8 @@ class RegisterView(FormView):
         token = secrets.token_hex(16)  # 16 - шкала чисел
         user.token = token
         user.save()
+
+        logout(self.request)
 
         host = self.request.get_host()
         url = f"http://{host}/users/email-confirm/{token}/"

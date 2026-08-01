@@ -10,23 +10,20 @@
 
             <!-- Элементы для авторизованных пользователей -->
             <li class="auth-required" style="display: none;">
-                <a href="/profile">Профиль пользователя</a>
-            </li>
-            <li class="auth-required" style="display: none;">
                 <a href="/personal">Личный кабинет</a>
             </li>
-
-            <!-- Ссылка на админку (только для Manager) -->
-            <li class="auth-required admin-link" style="display: none;">
-                <a href="/admin" style="background: #e67e22;">Админка</a>
-            </li>
+            {% if user.is_staff and user.is_superuser %}
+                <li class="auth-required admin-link" style="display: none;">
+                    <a href="/admin" style="background: #e67e22;">Админка</a>
+                </li>
+            {% endif %}
             {% if user.is_authenticated %}
                 <li class="auth-required user-actions" style="display: none;">
-                    <a href="users/logout" class="btn-logout">Выход</a>
+                    <a href="{% url 'users:logout' %}" class="btn-logout">Выход</a>
                 </li>
             {% else %}
                 <li class="auth-required user-actions" style="display: none;">
-                    <a href="users/login" class="btn-logout">Вход</a>
+                    <a href="{% url 'users:login' %}" class="btn-logout">Вход</a>
                 </li>
             {% endif %}
 

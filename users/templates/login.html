@@ -17,15 +17,15 @@
             <p>Введите свои данные для входа в систему</p>
         </div>
 
-        <form class="auth-form" method="POST" action="/login" id="loginForm">
+        <form class="auth-form" method="POST" action="{% url 'users:login' %}" id="loginForm">
             {% csrf_token %}
 
             <!-- Поле Email/Логин -->
             <div class="form-group">
-                <label for="email">
-                    <i class="fas fa-envelope"></i> Email или логин
+                <label for="username">
+                    <i class="fas fa-envelope"></i> Email
                 </label>
-                <input type="email" id="email" name="email" placeholder="example@mail.ru" required>
+                <input type="email" id="username" name="username" placeholder="example@mail.ru" required>
             </div>
 
             <!-- Поле Пароль -->
@@ -41,13 +41,8 @@
                 </div>
             </div>
 
-            <!-- Запомнить меня и Забыли пароль? (в одну строку) -->
+            <!-- Забыли пароль? -->
             <div class="form-options">
-                <label class="checkbox-label">
-                    <input type="checkbox" name="remember">
-                    <span class="checkmark"></span>
-                    Запомнить меня
-                </label>
                 <button type="button" class="forgot-link-btn" onclick="location.href='/password-reset'">
                     Забыли пароль?
                 </button>
@@ -64,7 +59,7 @@
             </div>
 
             <!-- Кнопка Зарегистрироваться -->
-            <button type="button" class="btn-register" onclick="location.href='/register'">
+            <button type="button" class="btn-register" onclick="location.href='/users/register'">
                 <i class="fas fa-user-plus"></i> Зарегистрироваться
             </button>
 
@@ -72,6 +67,14 @@
             <button type="button" class="btn-reset-password" onclick="location.href='/password-reset'">
                 <i class="fas fa-key"></i> Восстановить пароль
             </button>
+
+            <!-- Сообщение об ошибке от Django -->
+            {% if form.errors %}
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                Неверный email или пароль. Пожалуйста, попробуйте снова.
+            </div>
+            {% endif %}
 
             <!-- Сообщение об ошибке -->
             {% if error %}
