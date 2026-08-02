@@ -22,4 +22,4 @@ class AppointmentForm(forms.ModelForm):
             except (ValueError, TypeError):
                 pass
         elif self.instance.pk:
-            self.fields['doctor'].queryset = self.instance.service.doctors.all()
+            self.fields['doctor'].queryset = self.instance.services.doctors.all()

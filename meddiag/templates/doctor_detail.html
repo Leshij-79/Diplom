@@ -67,39 +67,63 @@
                 <i class="fas fa-stethoscope"></i> Услуги, которые оказывает врач
             </h3>
             {% if services %}
-            <div class="doctor-services-grid">
-                {% for service in services %}
-                <a href="{% url 'meddiag:service_detail' service.pk %}?doctor_id={{ doctor.pk }}"
-                   class="doctor-service-item">
-                    <div class="service-icon-small">
-                        <i class="fas fa-stethoscope"></i>
-                    </div>
-                    <div class="service-info-small">
-                        <h4>{{ service.name }}</h4>
-                        <p class="service-price-small">
-                            <i class="fas fa-ruble-sign"></i> {{ service.price }} ₽
-                        </p>
-                        <p class="service-duration-small">
-                            <i class="fas fa-clock"></i> {{ service.duration_execution }} мин
-                        </p>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
+                <div class="doctor-services-grid">
+                    {% for service in services %}
+                        {% if not from_service_page %}
+                            <a href="{% url 'meddiag:service_detail' service.pk %}?doctor_id={{ doctor.pk }}"
+                                class="doctor-service-item">
+                                <div class="service-icon-small">
+                                    <i class="fas fa-stethoscope"></i>
+                                </div>
+                                <div class="service-info-small">
+                                    <h4>{{ service.name }}</h4>
+                                    <p class="service-price-small">
+                                        <i class="fas fa-ruble-sign"></i> {{ service.price }} ₽
+                                    </p>
+                                    <p class="service-duration-small">
+                                        <i class="fas fa-clock"></i> {{ service.duration_execution }} мин
+                                    </p>
+                                </div>
+                            </a>
+                        {% else %}
+                            <div class="doctor-service-item">
+                                <div class="service-icon-small">
+                                    <i class="fas fa-stethoscope"></i>
+                                </div>
+                                <div class="service-info-small">
+                                    <h4>{{ service.name }}</h4>
+                                    <p class="service-price-small">
+                                        <i class="fas fa-ruble-sign"></i> {{ service.price }} ₽
+                                    </p>
+                                    <p class="service-duration-small">
+                                        <i class="fas fa-clock"></i> {{ service.duration_execution }} мин
+                                    </p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% if not from_service_page %}
+                    <h3>
+                        Вы можете записаться на приём выбрав услугу
+                    </h3>
+                {% endif %}
             {% else %}
-            <div class="empty-services">
-                <i class="fas fa-stethoscope"></i>
-                <p>Врач пока не оказывает услуг</p>
-            </div>
+                <div class="empty-services">
+                    <i class="fas fa-stethoscope"></i>
+                    <p>Врач пока не оказывает услуг</p>
+                </div>
             {% endif %}
         </div>
 
         <!-- Кнопки действий -->
         <div class="doctor-detail-actions">
             {% if user.is_authenticated %}
-                <a href="{% url 'meddiag:appointment_create' %}?doctor={{ doctor.pk }}" class="btn-appointment">
-                    <i class="fas fa-calendar-plus"></i> Записаться на прием
-                </a>
+                {% if from_service_page %}
+                    <a href="{% url 'meddiag:appointment_create' %}?doctor={{ doctor.pk }}&service={{ service_id }}" class="btn-appointment">
+                        <i class="fas fa-calendar-plus"></i> Записаться на прием
+                    </a>
+                {% endif %}
             {% else %}
                 <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn-appointment">
                     <i class="fas fa-calendar-plus"></i> Войти

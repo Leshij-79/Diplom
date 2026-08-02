@@ -17,113 +17,51 @@
             <p>Заполните форму для записи к врачу</p>
         </div>
 
-        <form class="appointment-form" method="POST" action="{% url 'meddiag:appointment_create' %}" id="appointmentForm">
+        <form class="appointment-form" method="POST">
             {% csrf_token %}
 
-            <!-- Скрытые поля для передачи контекста -->
-            {% if from_service %}
-            <input type="hidden" name="from_service" value="{{ from_service.id }}">
-            {% endif %}
-            {% if from_doctor %}
-            <input type="hidden" name="from_doctor" value="{{ from_doctor.id }}">
+            <!-- Вывод сообщений -->
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}{{ message.tags }}{% endif %}">
+                    <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% else %}info-circle{% endif %}"></i>
+                    {{ message }}
+                </div>
+                {% endfor %}
             {% endif %}
 
-            <!-- Выбор услуги -->
+            <!-- Услуга -->
             <div class="form-group">
-                <label for="service">
+                <label for="{{ form.services.id_for_label }}">
                     <i class="fas fa-stethoscope"></i> Услуга <span class="required">*</span>
                 </label>
-                <select id="service" name="service" required>
-                    <option value="">Выберите услугу</option>
-                    {% for service in services %}
-                    <option value="{{ service.id }}" 
-                            {% if selected_service and selected_service.id == service.id %}selected{% endif %}>
-                        {{ service.name }} - {{ service.price }} ₽ ({{ service.duration_execution }} мин)
-                    </option>
-                    {% endfor %}
-                </select>
-                {% if form.service.errors %}
-                <div class="field-error">{{ form.service.errors }}</div>
+                {{ form.services }}
+                {% if form.services.errors %}
+                    <div class="field-error">{{ form.services.errors }}</div>
                 {% endif %}
             </div>
 
-            <!-- Выбор врача -->
+            <!-- Врач -->
             <div class="form-group">
-                <label for="doctor">
+                <label for="{{ form.doctor.id_for_label }}">
                     <i class="fas fa-user-md"></i> Врач <span class="required">*</span>
                 </label>
-                <select id="doctor" name="doctor" required>
-                    <option value="">Сначала выберите услугу</option>
-                    {% if selected_doctor %}
-                    <option value="{{ selected_doctor.id }}" selected>
-                        {{ selected_doctor.last_name }} {{ selected_doctor.first_name }} 
-                        {{ selected_doctor.middle_name }} ({{ selected_doctor.specialization }})
-                    </option>
-                    {% endif %}
-                </select>
+                {{ form.doctor }}
                 {% if form.doctor.errors %}
-                <div class="field-error">{{ form.doctor.errors }}</div>
+                    <div class="field-error">{{ form.doctor.errors }}</div>
                 {% endif %}
             </div>
 
             <!-- Дата и время -->
-            <div class="form-row">
-                <div class="form-group half">
-                    <label for="date">
-                        <i class="fas fa-calendar-day"></i> Дата <span class="required">*</span>
-                    </label>
-                    <input type="date" id="date" name="date" 
-                           min="{{ min_date }}" 
-                           value="{{ selected_date|default:'' }}" required>
-                    {% if form.date.errors %}
-                    <div class="field-error">{{ form.date.errors }}</div>
-                    {% endif %}
-                </div>
-                <div class="form-group half">
-                    <label for="time">
-                        <i class="fas fa-clock"></i> Время <span class="required">*</span>
-                    </label>
-                    <input type="time" id="time" name="time" 
-                           min="08:00" max="20:00" 
-                           value="{{ selected_time|default:'' }}" required>
-                    <div class="field-hint">Рабочее время: 8:00 - 20:00</div>
-                    {% if form.time.errors %}
-                    <div class="field-error">{{ form.time.errors }}</div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Дополнительная информация -->
             <div class="form-group">
-                <label for="comment">
-                    <i class="fas fa-comment"></i> Комментарий
+                <label for="{{ form.datetime.id_for_label }}">
+                    <i class="fas fa-calendar-clock"></i> Дата и время <span class="required">*</span>
                 </label>
-                <textarea id="comment" name="comment" rows="3" 
-                          placeholder="Укажите дополнительные пожелания или вопросы">{{ comment|default:'' }}</textarea>
-                {% if form.comment.errors %}
-                <div class="field-error">{{ form.comment.errors }}</div>
+                {{ form.datetime }}
+                <div class="field-hint">Рабочее время: 8:00 - 20:00</div>
+                {% if form.datetime.errors %}
+                    <div class="field-error">{{ form.datetime.errors }}</div>
                 {% endif %}
-            </div>
-
-            <!-- Информация о выбранных услуге и враче -->
-            <div class="appointment-summary" id="appointmentSummary" style="display: none;">
-                <h3><i class="fas fa-info-circle"></i> Выбранные параметры</h3>
-                <div class="summary-item">
-                    <span class="summary-label">Услуга:</span>
-                    <span class="summary-value" id="summaryService">—</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Врач:</span>
-                    <span class="summary-value" id="summaryDoctor">—</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Дата и время:</span>
-                    <span class="summary-value" id="summaryDateTime">—</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Стоимость:</span>
-                    <span class="summary-value" id="summaryPrice">—</span>
-                </div>
             </div>
 
             <!-- Кнопки -->
@@ -135,161 +73,86 @@
                     <i class="fas fa-times-circle"></i> Отмена
                 </button>
             </div>
-
-            <!-- Сообщения об ошибках -->
-            {% if form.non_field_errors %}
-            <div class="alert alert-error">
-                <i class="fas fa-exclamation-circle"></i>
-                {% for error in form.non_field_errors %}
-                    {{ error }}
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            {% if messages %}
-                {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %}">
-                    <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% else %}info-circle{% endif %}"></i>
-                    {{ message }}
-                </div>
-                {% endfor %}
-            {% endif %}
         </form>
     </div>
 </section>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const serviceSelect = document.getElementById('service');
-    const doctorSelect = document.getElementById('doctor');
-    const dateInput = document.getElementById('date');
-    const timeInput = document.getElementById('time');
-    const summaryDiv = document.getElementById('appointmentSummary');
-    const summaryService = document.getElementById('summaryService');
-    const summaryDoctor = document.getElementById('summaryDoctor');
-    const summaryDateTime = document.getElementById('summaryDateTime');
-    const summaryPrice = document.getElementById('summaryPrice');
+    const serviceSelect = document.getElementById('id_services');
+    const doctorSelect = document.getElementById('id_doctor');
 
-    // Данные о врачах по услугам (передаются из views)
-    const doctorsByService = {{ doctors_by_service|safe }};
+    // Данные о врачах по услугам
+    const doctorsByService = {{ doctor_for_service|safe }};
 
-    // Данные об услугах
-    const servicesData = {
-        {% for service in services %}
-        "{{ service.id }}": {
-            "name": "{{ service.name }}",
-            "price": "{{ service.price }}"
-        },
-        {% endfor %}
-    };
+    // ID предварительно выбранного врача (из GET-параметра)
+    const selectedDoctorId = "{{ request.GET.doctor|default:'' }}";
+    // ID предварительно выбранной услуги
+    const selectedServiceId = "{{ request.GET.service|default:'' }}";
 
-    // Обновление списка врачей при выборе услуги
-    serviceSelect.addEventListener('change', function() {
-        const serviceId = this.value;
+    function updateDoctors() {
+        const serviceId = serviceSelect.value;
+        const currentSelection = doctorSelect.value; // Сохраняем текущее значение
+
+        // Очищаем список
         doctorSelect.innerHTML = '<option value="">Выберите врача</option>';
-        
+
         if (serviceId && doctorsByService[serviceId]) {
-            doctorsByService[serviceId].forEach(function(doctor) {
+            const doctors = doctorsByService[serviceId];
+
+            // Добавляем врачей
+            doctors.forEach(function(doctor) {
                 const option = document.createElement('option');
                 option.value = doctor.id;
-                option.textContent = doctor.last_name + ' ' + doctor.first_name + 
+                option.textContent = doctor.last_name + ' ' + doctor.first_name +
                                     ' ' + doctor.middle_name + ' (' + doctor.specialization + ')';
                 doctorSelect.appendChild(option);
             });
-        }
-        
-        updateSummary();
-    });
 
-    // Обновление сводки при любых изменениях
-    doctorSelect.addEventListener('change', updateSummary);
-    dateInput.addEventListener('change', updateSummary);
-    timeInput.addEventListener('change', updateSummary);
+            // Логика автоматического выбора
+            if (doctors.length === 1) {
+                // Если только один врач
+                const singleDoctorId = doctors[0].id;
 
-    function updateSummary() {
-        const serviceId = serviceSelect.value;
-        const doctorId = doctorSelect.value;
-        const date = dateInput.value;
-        const time = timeInput.value;
-
-        let hasData = false;
-
-        if (serviceId && servicesData[serviceId]) {
-            summaryService.textContent = servicesData[serviceId].name;
-            summaryPrice.textContent = servicesData[serviceId].price + ' ₽';
-            hasData = true;
+                // Проверяем, совпадает ли с предварительно выбранным
+                if (selectedDoctorId && selectedDoctorId == singleDoctorId) {
+                    doctorSelect.value = singleDoctorId;
+                } else if (!selectedDoctorId) {
+                    // Если предварительно не выбран - выбираем единственного
+                    doctorSelect.value = singleDoctorId;
+                } else {
+                    // Если предварительно выбран другой врач (не из списка)
+                    // Показываем сообщение или оставляем пустым
+                    doctorSelect.value = '';
+                }
+            } else if (doctors.length > 1) {
+                // Если несколько врачей
+                // Проверяем, есть ли предварительно выбранный врач в списке
+                if (selectedDoctorId) {
+                    const doctorExists = doctors.some(d => d.id == selectedDoctorId);
+                    if (doctorExists) {
+                        doctorSelect.value = selectedDoctorId;
+                    } else {
+                        // Если предварительно выбранного врача нет в списке
+                        // оставляем пустым
+                        doctorSelect.value = '';
+                    }
+                } else {
+                    // Если предварительно не выбран - оставляем пустым
+                    doctorSelect.value = '';
+                }
+            }
         } else {
-            summaryService.textContent = '—';
-            summaryPrice.textContent = '—';
+            // Если услуга не выбрана - очищаем список врачей
+            doctorSelect.innerHTML = '<option value="">Сначала выберите услугу</option>';
         }
-
-        if (doctorId) {
-            const doctorOption = doctorSelect.options[doctorSelect.selectedIndex];
-            summaryDoctor.textContent = doctorOption ? doctorOption.textContent : '—';
-            hasData = true;
-        } else {
-            summaryDoctor.textContent = '—';
-        }
-
-        if (date && time) {
-            const dateObj = new Date(date + 'T' + time);
-            summaryDateTime.textContent = dateObj.toLocaleString('ru-RU', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-            hasData = true;
-        } else {
-            summaryDateTime.textContent = '—';
-        }
-
-        summaryDiv.style.display = hasData ? 'block' : 'none';
     }
 
-    // Если уже выбрана услуга - обновляем врачей
-    if (serviceSelect.value) {
-        serviceSelect.dispatchEvent(new Event('change'));
-    }
+    // Обновляем врачей при загрузке
+    updateDoctors();
 
-    // Валидация формы
-    document.getElementById('appointmentForm').addEventListener('submit', function(e) {
-        const service = document.getElementById('service').value;
-        const doctor = document.getElementById('doctor').value;
-        const date = document.getElementById('date').value;
-        const time = document.getElementById('time').value;
-
-        // Удаляем старые сообщения
-        const oldAlerts = this.querySelectorAll('.alert');
-        oldAlerts.forEach(el => el.remove());
-
-        let hasError = false;
-        let errorMessage = '';
-
-        if (!service) {
-            hasError = true;
-            errorMessage = 'Пожалуйста, выберите услугу.';
-        } else if (!doctor) {
-            hasError = true;
-            errorMessage = 'Пожалуйста, выберите врача.';
-        } else if (!date) {
-            hasError = true;
-            errorMessage = 'Пожалуйста, выберите дату.';
-        } else if (!time) {
-            hasError = true;
-            errorMessage = 'Пожалуйста, выберите время.';
-        }
-
-        if (hasError) {
-            e.preventDefault();
-            const alert = document.createElement('div');
-            alert.className = 'alert alert-error';
-            alert.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + errorMessage;
-            const actions = this.querySelector('.appointment-actions');
-            this.insertBefore(alert, actions);
-        }
-    });
+    // Обновляем врачей при изменении услуги
+    serviceSelect.addEventListener('change', updateDoctors);
 });
 </script>
 {% endblock %}
