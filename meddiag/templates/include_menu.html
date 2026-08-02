@@ -2,10 +2,10 @@
 <nav class="nav-menu">
     <div class="nav-container">
         <ul class="nav-list">
-            <li><a href="/" class="active">Главная</a></li>
+            <li><a href="{% url 'meddiag:index' %}" class="active">Главная</a></li>
             <li><a href="/about">О компании</a></li>
-            <li><a href="/services">Услуги</a></li>
-            <li><a href="/doctors">Врачи</a></li>
+            <li><a href="{% url 'meddiag:services_list' %}">Услуги</a></li>
+            <li><a href="{% url 'meddiag:doctors_list' %}">Врачи</a></li>
             <li><a href="/contacts">Контакты</a></li>
 
             <!-- Элементы для авторизованных пользователей -->

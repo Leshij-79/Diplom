@@ -134,9 +134,9 @@
                 <a href="{% url 'meddiag:services_list' %}?service={{ service.id }}" class="btn-appointment">
                     <i class="fas fa-calendar-plus"></i> Записаться
                 </a>
-                <a href="{% url 'meddiag:services_list' %}" class="btn-back">
+                <button onclick="history.back()" class="btn-back">
                     <i class="fas fa-arrow-left"></i> Вернуться
-                </a>
+                </button>
             </div>
         </div>
     </div>

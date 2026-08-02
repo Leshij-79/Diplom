@@ -2,7 +2,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView
 from icecream import ic
 
-from meddiag.models import Direction, Services
+from meddiag.models import Direction, Services, Doctors
 from meddiag.services import ServicesServices
 
 
@@ -60,6 +60,77 @@ class ServiceDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['doctors'] = self.object.doctors.all()
+        doctor_id = self.request.GET.get('doctor_id')
+
+        if doctor_id:
+            try:
+                context['doctor'] = self.object.doctors.filter(pk=doctor_id)
+                context['from_doctor_page'] = True
+                context['doctor_id'] = doctor_id
+            except Doctors.DoesNotExist:
+                context['doctor'] = self.object.doctors.all()
+                context['from_doctor_page'] = False
+        else:
+            context['doctor'] = self.object.doctors.all()
+            context['from_doctor_page'] = False
+
+        back_url = self.request.GET.get('next')
+        if not back_url:
+            back_url = reverse_lazy('meddiag:services_list')
+        context['back_url'] = back_url
+
+        return context
+
+
+class DoctorsListView(ListView):
+    model = Doctors
+    template_name = 'doctors_list.html'
+    context_object_name = 'doctors_list'
+
+    def get_queryset(self):
+        queryset = Doctors.objects.select_related('direction').all()
+        direction_id = self.kwargs.get('pk')
+
+        if direction_id:
+            queryset = queryset.filter(direction=direction_id)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['directions'] = Direction.objects.all()
+
+        direction_id = self.kwargs.get('pk')
+        context['current_direction_id'] = direction_id
+
+        if direction_id:
+            try:
+                context['current_direction'] = Direction.objects.get(pk=direction_id)
+            except Direction.DoesNotExist:
+                context['current_direction'] = None
+        else:
+            context['current_direction'] = None
+
+        return context
+
+
+class DoctorDetailView(DetailView):
+    model = Doctors
+    template_name = 'doctor_detail.html'
+    context_object_name = 'doctor'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        services = self.object.services_set.all()
+        context['services'] = services
+
+        # Получаем услуги, которые оказывает врач
+        # context['services'] = self.object.doctors_service.all()
+
+        back_url = self.request.GET.get('next')
+        if not back_url:
+            back_url = reverse_lazy('meddiag:doctors_list')
+        context['back_url'] = back_url
 
         return context

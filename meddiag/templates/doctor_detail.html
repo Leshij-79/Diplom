@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}{{ doctor.last_name }} {{ doctor.first_name }} - Медицинская Диагностика{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/doctors.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="section doctor-detail-section">
+    <div class="doctor-detail-container">
+        <!-- Хлебные крошки -->
+        <div class="breadcrumbs">
+            <a href="{% url 'meddiag:index' %}">Главная</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="{% url 'meddiag:doctors_list' %}">Врачи</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>{{ doctor.last_name }} {{ doctor.first_name }}</span>
+        </div>
+
+        <!-- Информация о враче -->
+        <div class="doctor-detail-card">
+            <div class="doctor-detail-image">
+                {% if doctor.foto %}
+                <img src="{{ doctor.foto.url }}" alt="{{ doctor.last_name }} {{ doctor.first_name }}">
+                {% else %}
+                <div class="doctor-detail-avatar">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                {% endif %}
+            </div>
+            <div class="doctor-detail-info">
+                <h2>{{ doctor.last_name }} {{ doctor.first_name }} {{ doctor.middle_name }}</h2>
+                <p class="doctor-detail-specialization">
+                    <i class="fas fa-stethoscope"></i> {{ doctor.specialization }}
+                </p>
+                <div class="doctor-detail-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Стаж работы: <strong>{{ doctor.experience }} лет</strong></span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-certificate"></i>
+                        <span>Категория: 
+                            <strong>
+                                {% if doctor.category == 'highest' %}Высшая категория
+                                {% elif doctor.category == 'first' %}Первая категория
+                                {% elif doctor.category == 'second' %}Вторая категория
+                                {% else %}Без категории
+                                {% endif %}
+                            </strong>
+                        </span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-tag"></i>
+                        <span>Направление: <strong>{{ doctor.direction.name }}</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Услуги, которые оказывает врач -->
+        <div class="doctor-services">
+            <h3>
+                <i class="fas fa-stethoscope"></i> Услуги, которые оказывает врач
+            </h3>
+            {% if services %}
+            <div class="doctor-services-grid">
+                {% for service in services %}
+                <a href="{% url 'meddiag:service_detail' service.pk %}" class="doctor-service-item">
+                    <div class="service-icon-small">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <div class="service-info-small">
+                        <h4>{{ service.name }}</h4>
+                        <p class="service-price-small">
+                            <i class="fas fa-ruble-sign"></i> {{ service.price }} ₽
+                        </p>
+                        <p class="service-duration-small">
+                            <i class="fas fa-clock"></i> {{ service.duration_execution }} мин
+                        </p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-services">
+                <i class="fas fa-stethoscope"></i>
+                <p>Врач пока не оказывает услуг</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Кнопки действий appointment_create-->
+        <div class="doctor-detail-actions">
+            <a href="{% url 'meddiag:doctors_list' %}?doctor={{ doctor.pk }}" class="btn-appointment">
+                <i class="fas fa-calendar-plus"></i> Записаться на прием
+            </a>
+            <a href="{% url 'meddiag:doctors_list' %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Вернуться к списку
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
