@@ -52,6 +52,10 @@ function openContactForm() {
     window.location.href = '/contact-form';
 }
 
+function openAppointmentForm() {
+    window.location.href = '/appointment/create';
+}
+
 function openLoginForm() {
     window.location.href = '/login';
 }

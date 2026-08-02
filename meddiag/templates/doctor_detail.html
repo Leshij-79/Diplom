@@ -94,10 +94,10 @@
             {% endif %}
         </div>
 
-        <!-- Кнопки действий appointment_create-->
+        <!-- Кнопки действий -->
         <div class="doctor-detail-actions">
             {% if user.is_authenticated %}
-                <a href="{% url 'meddiag:doctors_list' %}?doctor={{ doctor.pk }}" class="btn-appointment">
+                <a href="{% url 'meddiag:appointment_create' %}?doctor={{ doctor.pk }}" class="btn-appointment">
                     <i class="fas fa-calendar-plus"></i> Записаться на прием
                 </a>
             {% else %}

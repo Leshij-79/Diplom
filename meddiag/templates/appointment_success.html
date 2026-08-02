@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Запись создана - Медицинская Диагностика{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/appointment.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="section appointment-section">
+    <div class="appointment-container success-container">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h2>Запись успешно создана!</h2>
+        <p>Вы записаны на прием. Подробности отправлены на вашу почту.</p>
+        
+        <div class="success-actions">
+            <a href="{% url 'meddiag:index' %}" class="btn-submit">
+                <i class="fas fa-home"></i> На главную
+            </a>
+            <a href="{% url 'users:profile' user.pk %}" class="btn-back">
+                <i class="fas fa-user"></i> Личный кабинет
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

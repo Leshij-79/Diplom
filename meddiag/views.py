@@ -4,12 +4,13 @@ from typing import Any
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, FormView
+from django.views.generic import ListView, DetailView, FormView, TemplateView
 from icecream import ic
 
-from meddiag.models import Direction, Services, Doctors
+from meddiag.forms import AppointmentForm
+from meddiag.models import Direction, Services, Doctors, Appointment
 from meddiag.services import ServicesServices
 
 
@@ -135,6 +136,7 @@ class DoctorDetailView(DetailView):
 
 class AppointmentCreateView(LoginRequiredMixin, FormView):
     template_name = 'appointment_create.html'
+    form_class = AppointmentForm
     success_url = reverse_lazy('meddiag:appointment_success')
 
     def get_context_data(self, **kwargs):
@@ -145,7 +147,7 @@ class AppointmentCreateView(LoginRequiredMixin, FormView):
         service_id = self.request.GET.get('service') or self.request.POST.get('service')
         if service_id:
             try:
-                context['select_service'] = Services.objects.get(pk=service_id)
+                context['selected_service'] = Services.objects.get(pk=service_id)
             except Services.DoesNotExist:
                 pass
 
@@ -157,7 +159,7 @@ class AppointmentCreateView(LoginRequiredMixin, FormView):
                 pass
 
         doctor_for_service = {}
-        for service in context['select_service']:
+        for service in context['services']:
             doctors = service.doctors.all()
 
             for doctor in doctors:
@@ -205,4 +207,74 @@ class AppointmentCreateView(LoginRequiredMixin, FormView):
 #TODO: поставить время из таблицы настроек
 
             if appointment_datetime.hour < 8 or appointment_datetime.hour > 20:
-                messages.error(self.request, '')
+                messages.error(self.request, 'Выбрано не рабочее время')
+                return self.form_invalid(form)
+
+            if appointment_datetime.date() < datetime.now().date():
+                messages.error(self.request, 'Выбрана прошедшая дата')
+                return self.form_invalid(form)
+
+            exist_appointment = Appointment.objects.filter(
+                doctor=doctor,
+                datetime=appointment_datetime,
+                status='active'
+            ).exists()
+
+            if exist_appointment:
+                messages.error(self.request, 'Это время занято')
+                return self.form_invalid(form)
+
+            appointment = Appointment(
+                patient=self.request.user,
+                doctor=doctor,
+                services=service,
+                datetime=appointment_datetime,
+                status='active'
+            )
+
+            appointment.save()
+#TODO как опция добавить отправку на почту пользователю
+            messages.success(self.request, f'Вы успешно записались к врачу {doctor.last_name} '
+                                           f'{doctor.first_name} {doctor.middle_name} на {service.name} в '
+                                           f'{appointment_datetime.strftime("%d.%m.%Y %H:%M")}'
+                             )
+
+            return redirect(self.success_url)
+
+        except (Services.DoesNotExist, Doctors.DoesNotExist):
+            messages.error(self.request, 'Выбранная услуга или врач не найдены.')
+            return self.form_invalid(form)
+
+        except ValueError:
+            messages.error(self.request, 'Неверный формат даты или времени.')
+            return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def get_initial(self):
+        initial = super().get_initial()
+
+        # Получаем параметры из GET-запроса
+        service_id = self.request.GET.get('service')
+        doctor_id = self.request.GET.get('doctor')
+
+        if service_id:
+            try:
+                service = Services.objects.get(pk=service_id)
+                initial['services'] = service.id
+            except Services.DoesNotExist:
+                pass
+
+        if doctor_id:
+            try:
+                doctor = Doctors.objects.get(pk=doctor_id)
+                initial['doctor'] = doctor.id
+            except Doctors.DoesNotExist:
+                pass
+
+        return initial
+
+
+class AppointmentSuccessView(LoginRequiredMixin, TemplateView):
+    template_name = 'appointment_success.html'

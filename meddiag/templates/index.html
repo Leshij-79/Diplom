@@ -11,7 +11,7 @@
         Точность, скорость и комфорт для каждого пациента.
     </p>
     {% if user.is_authenticated %}
-        <button class="btn-primary" onclick="openContactForm()">Записаться на прием</button>
+        <button class="btn-primary" onclick="openAppointmentForm()">Записаться на прием</button>
     {% else %}
         <button class="btn-primary" onclick="openLoginForm()">Войти</button>
     {% endif %}

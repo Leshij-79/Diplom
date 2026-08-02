@@ -157,9 +157,8 @@
 
             <!-- Кнопки действий -->
             <div class="service-detail-actions">
-                <!-- meddiag:appointment_create -->
                 {% if user.is_authenticated %}
-                    <a href="{% url 'meddiag:services_list' %}?service={{ service.id }}" class="btn-appointment">
+                    <a href="{% url 'meddiag:appointment_create' %}?service={{ service.id }}" class="btn-appointment">
                         <i class="fas fa-calendar-plus"></i> Записаться
                     </a>
                 {% else %}
