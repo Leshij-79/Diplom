@@ -9,9 +9,11 @@
             <li><a href="/contacts">Контакты</a></li>
 
             <!-- Элементы для авторизованных пользователей -->
-            <li class="auth-required" style="display: none;">
-                <a href="/personal">Личный кабинет</a>
-            </li>
+            {% if user.is_authenticated %}
+                <li class="auth-required" style="display: none;">
+                    <a href="/personal">Личный кабинет</a>
+                </li>
+            {% endif %}
             {% if user.is_staff and user.is_superuser %}
                 <li class="auth-required admin-link" style="display: none;">
                     <a href="/admin" style="background: #e67e22;">Админка</a>

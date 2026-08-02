@@ -10,7 +10,11 @@
         Современная медицинская диагностика с использованием передовых технологий.
         Точность, скорость и комфорт для каждого пациента.
     </p>
-    <button class="btn-primary" onclick="openContactForm()">Записаться на прием</button>
+    {% if user.is_authenticated %}
+        <button class="btn-primary" onclick="openContactForm()">Записаться на прием</button>
+    {% else %}
+        <button class="btn-primary" onclick="openLoginForm()">Войти</button>
+    {% endif %}
 </section>
 
 <!-- Описание компании -->

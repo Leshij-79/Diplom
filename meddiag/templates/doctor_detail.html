@@ -24,11 +24,11 @@
         <div class="doctor-detail-card">
             <div class="doctor-detail-image">
                 {% if doctor.foto %}
-                <img src="{{ doctor.foto.url }}" alt="{{ doctor.last_name }} {{ doctor.first_name }}">
+                    <img src="{{ doctor.foto.url }}" alt="{{ doctor.last_name }} {{ doctor.first_name }}">
                 {% else %}
-                <div class="doctor-detail-avatar">
-                    <i class="fas fa-user-md"></i>
-                </div>
+                    <div class="doctor-detail-avatar">
+                        <i class="fas fa-user-md"></i>
+                    </div>
                 {% endif %}
             </div>
             <div class="doctor-detail-info">
@@ -69,7 +69,8 @@
             {% if services %}
             <div class="doctor-services-grid">
                 {% for service in services %}
-                <a href="{% url 'meddiag:service_detail' service.pk %}" class="doctor-service-item">
+                <a href="{% url 'meddiag:service_detail' service.pk %}?doctor_id={{ doctor.pk }}"
+                   class="doctor-service-item">
                     <div class="service-icon-small">
                         <i class="fas fa-stethoscope"></i>
                     </div>
@@ -95,9 +96,15 @@
 
         <!-- Кнопки действий appointment_create-->
         <div class="doctor-detail-actions">
-            <a href="{% url 'meddiag:doctors_list' %}?doctor={{ doctor.pk }}" class="btn-appointment">
-                <i class="fas fa-calendar-plus"></i> Записаться на прием
-            </a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'meddiag:doctors_list' %}?doctor={{ doctor.pk }}" class="btn-appointment">
+                    <i class="fas fa-calendar-plus"></i> Записаться на прием
+                </a>
+            {% else %}
+                <a href="{% url 'users:login' %}" class="btn-appointment">
+                    <i class="fas fa-calendar-plus"></i> Войти
+                </a>
+            {% endif %}
             <a href="{% url 'meddiag:doctors_list' %}" class="btn-back">
                 <i class="fas fa-arrow-left"></i> Вернуться к списку
             </a>

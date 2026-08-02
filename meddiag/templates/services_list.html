@@ -46,7 +46,8 @@
             </div>
             <div class="service-info">
                 <h3>
-                    <a href="{% url 'meddiag:service_detail' service.pk %}" class="service-link">
+                    <a href="{% url 'meddiag:service_detail' service.pk %}?next={{ request.path }}"
+                       class="service-link">
                         {{ service.name }}
                     </a>
                 </h3>
@@ -62,7 +63,8 @@
                         <i class="fas fa-tag"></i> {{ service.direction.title }}
                     </span>
                 </div>
-                <a href="{% url 'meddiag:service_detail' service.pk %}" class="btn-service-detail">
+                <a href="{% url 'meddiag:service_detail' service.pk %}"
+                   class="btn-service-detail">
                     Подробнее <i class="fas fa-arrow-right"></i>
                 </a>
             </div>

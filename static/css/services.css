@@ -515,3 +515,21 @@
     background: #2980b9;
     color: #fff;
 }
+
+.btn-doctor-detail {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 16px;
+    background: #3498db;
+    color: #fff;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: background 0.3s ease;
+}
+
+.btn-doctor-detail:hover {
+    background: #2980b9;
+    color: #fff;
+    text-decoration: none;
+}

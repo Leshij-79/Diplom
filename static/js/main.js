@@ -52,6 +52,10 @@ function openContactForm() {
     window.location.href = '/contact-form';
 }
 
+function openLoginForm() {
+    window.location.href = '/login';
+}
+
 // Имитация авторизации (для демонстрации)
 const userRole = 'Manager'; // Может быть 'Manager', 'User' или null (не авторизован)
 

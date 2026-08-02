@@ -64,20 +64,15 @@ class ServiceDetailView(DetailView):
 
         if doctor_id:
             try:
-                context['doctor'] = self.object.doctors.filter(pk=doctor_id)
+                context['doctors'] = self.object.doctors.filter(pk=doctor_id)
                 context['from_doctor_page'] = True
                 context['doctor_id'] = doctor_id
             except Doctors.DoesNotExist:
-                context['doctor'] = self.object.doctors.all()
+                context['doctors'] = self.object.doctors.all()
                 context['from_doctor_page'] = False
         else:
-            context['doctor'] = self.object.doctors.all()
+            context['doctors'] = self.object.doctors.all()
             context['from_doctor_page'] = False
-
-        back_url = self.request.GET.get('next')
-        if not back_url:
-            back_url = reverse_lazy('meddiag:services_list')
-        context['back_url'] = back_url
 
         return context
 
@@ -122,15 +117,10 @@ class DoctorDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        services = self.object.services_set.all()
+        services = self.object.doctors_service.all()
         context['services'] = services
 
         # Получаем услуги, которые оказывает врач
         # context['services'] = self.object.doctors_service.all()
-
-        back_url = self.request.GET.get('next')
-        if not back_url:
-            back_url = reverse_lazy('meddiag:doctors_list')
-        context['back_url'] = back_url
 
         return context
