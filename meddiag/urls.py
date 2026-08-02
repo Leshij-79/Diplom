@@ -11,6 +11,7 @@ urlpatterns = [
     path("", IndexListView.as_view(), name="index"),
     path("services/", ServicesListView.as_view(), name="services_list"),
     path("service/<int:pk>/", ServiceDetailView.as_view(), name="service_detail"),
+    path("services/<int:pk>/", ServicesListView.as_view(), name="services_list_index"),
 ]
 
 if settings.DEBUG:

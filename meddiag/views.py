@@ -35,6 +35,20 @@ class ServicesListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['directions'] = Direction.objects.all()
+
+        # Добавляем ID текущей категории
+        direction_id = self.kwargs.get('pk')
+        context['current_category_id'] = direction_id
+
+        # Добавляем текущую категорию для отображения названия
+        if direction_id:
+            try:
+                context['current_direction'] = Direction.objects.get(pk=direction_id)
+            except Direction.DoesNotExist:
+                context['current_direction'] = None
+        else:
+            context['current_direction'] = None
+
         return context
 
 
@@ -43,9 +57,6 @@ class ServiceDetailView(DetailView):
     template_name = 'service_detail.html'
     context_object_name = "service"
     success_url = reverse_lazy("meddiag:services_list")
-
-    # def get_queryset(self):
-    #     return Services.objects.filter(pk=self.request.GET.get('pk'))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

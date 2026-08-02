@@ -346,3 +346,39 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+#services .service-card a {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.3s ease;
+}
+
+/* Добавляем подчеркивание при наведении */
+#services .service-card a:hover {
+    text-decoration: underline;
+    color: #2e86c1; /* Цвет как у кнопки */
+}
+
+/* Или только для заголовков */
+#services .service-card h3 a {
+    text-decoration: none;
+    color: #2c3e50;
+    transition: all 0.3s ease;
+}
+
+#services .service-card h3 a:hover {
+    text-decoration: underline;
+    color: #2e86c1;
+}
+
+/* Для параграфов */
+#services .service-card p a {
+    text-decoration: none;
+    color: #555;
+    transition: all 0.3s ease;
+}
+
+#services .service-card p a:hover {
+    text-decoration: underline;
+    color: #2e86c1;
+}

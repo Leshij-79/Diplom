@@ -11,15 +11,29 @@
 {% block content %}
 <section class="section services-section">
     <div class="services-header">
-        <h2>Наши услуги</h2>
+        <h2>
+            {% if current_direction %}
+                {{ current_direction.name }}
+            {% else %}
+                Наши услуги
+            {% endif %}
+        </h2>
         <p>Выберите направление диагностики, чтобы ознакомиться с полным перечнем услуг</p>
     </div>
 
     <!-- Категории услуг -->
     <div class="categories-tabs">
-        <button class="category-tab active" data-category="all">Все услуги</button>
+        <a href="{% url 'meddiag:services_list' %}"
+           class="category-tab {% if not current_category_id %}active{% endif %}"
+           data-category="all">
+            Все услуги
+        </a>
         {% for direction in directions %}
-        <button class="category-tab" data-category="{{ direction.id }}">{{ direction.title }}</button>
+            <a href="{% url 'meddiag:services_list_index' direction.pk %}"
+               class="category-tab {% if current_category_id|stringformat:'s' == direction.pk|stringformat:'s' %}active{% endif %}"
+               data-category="{{ direction.id }}">
+                {{ direction.title }}
+            </a>
         {% endfor %}
     </div>
 
@@ -67,21 +81,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const tabs = document.querySelectorAll('.category-tab');
     const services = document.querySelectorAll('.service-item');
 
+    // Определяем текущую активную категорию
+    const activeTab = document.querySelector('.category-tab.active');
+    let currentCategory = 'all';
+    if (activeTab) {
+        currentCategory = activeTab.dataset.category;
+    }
+
+    // Фильтруем услуги при загрузке страницы
+    services.forEach(service => {
+        if (currentCategory === 'all' || service.dataset.category === currentCategory) {
+            service.style.display = 'block';
+        } else {
+            service.style.display = 'none';
+        }
+    });
+
+    // Обработчики кликов для табов
     tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            // Удаляем активный класс у всех табов
+        tab.addEventListener('click', function(e) {
+            // Если это ссылка, она уже перенаправит на нужный URL
+            // Но мы все равно обновляем активный класс для визуального эффекта
             tabs.forEach(t => t.classList.remove('active'));
             this.classList.add('active');
-
-            const category = this.dataset.category;
-
-            services.forEach(service => {
-                if (category === 'all' || service.dataset.category === category) {
-                    service.style.display = 'block';
-                } else {
-                    service.style.display = 'none';
-                }
-            });
         });
     });
 });
