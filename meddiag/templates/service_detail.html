@@ -163,7 +163,7 @@
                         <i class="fas fa-calendar-plus"></i> Записаться
                     </a>
                 {% else %}
-                    <a href="{% url 'user:login' %}" class="btn-appointment">
+                    <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn-appointment">
                         <i class="fas fa-calendar-plus"></i> Войти
                     </a>
                 {% endif %}

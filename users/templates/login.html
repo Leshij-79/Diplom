@@ -20,6 +20,8 @@
         <form class="auth-form" method="POST" action="{% url 'users:login' %}" id="loginForm">
             {% csrf_token %}
 
+            <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
+
             <!-- Поле Email/Логин -->
             <div class="form-group">
                 <label for="username">

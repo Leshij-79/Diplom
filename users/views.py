@@ -27,6 +27,24 @@ class UserLoginView(LoginView):
     template_name = "login.html"
     success_url = reverse_lazy("meddiag:index")
 
+    def get_success_url(self):
+        next_url = self.request.POST.get('next') or self.request.GET.get('next')
+
+        if next_url:
+            return next_url
+
+        referer = self.request.META.get('HTTP_REFERER')
+        if referer:
+            return referer
+
+        return reverse_lazy('meddiag:index')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Передаем next в контекст для скрытого поля
+        context['next'] = self.request.GET.get('next', '')
+        return context
+
 
 def email_verification(request, token):
     user = get_object_or_404(CustomUser, token=token)
