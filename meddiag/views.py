@@ -4,11 +4,13 @@ from typing import Any
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, FormView, TemplateView
 from icecream import ic
 
+from config.settings import EMAIL_HOST_USER
 from meddiag.forms import AppointmentForm
 from meddiag.models import Direction, Services, Doctors, Appointment
 from meddiag.services import ServicesServices
@@ -197,19 +199,17 @@ class AppointmentCreateView(LoginRequiredMixin, FormView):
         return context
 
     def form_valid(self, form):
-        service = self.request.POST.get('services')
-        doctor = self.request.POST.get('doctor')
+        service_id = self.request.POST.get('services')
+        doctor_id = self.request.POST.get('doctor')
         appointment_datetime = form.cleaned_data.get('datetime')
+        service = get_object_or_404(Services, pk=service_id)
+        doctor = get_object_or_404(Doctors, pk=doctor_id)
 
         if not all([service, doctor, appointment_datetime]):
             messages.error(self.request, 'Пожалуйста, заполните все поля')
             return self.form_invalid(form)
 
         try:
-            # service = get_object_or_404(Services, pk=service_id)
-            # doctor = get_object_or_404(Doctors, pk=doctor_id)
-            # datetime_str = f"{date_str} {time_str}"
-            # appointment_datetime = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M')
 
 #TODO: поставить время из таблицы настроек
 
@@ -240,11 +240,18 @@ class AppointmentCreateView(LoginRequiredMixin, FormView):
             )
 
             appointment.save()
-#TODO как опция добавить отправку на почту пользователю
-            messages.success(self.request, f'Вы успешно записались к врачу {doctor.last_name} '
-                                           f'{doctor.first_name} {doctor.middle_name} на {service.name} в '
-                                           f'{appointment_datetime.strftime("%d.%m.%Y %H:%M")}'
-                             )
+            message_information = (f'Вы успешно записались к врачу {doctor.last_name} {doctor.first_name} '
+                                   f'{doctor.middle_name} на {service.name} в '
+                                   f'{appointment_datetime.strftime("%d.%m.%Y %H:%M")}')
+            messages.success(self.request, message_information)
+
+            user = self.request.user
+            send_mail(
+                subject="Запись на приём",
+                message=message_information,
+                from_email=EMAIL_HOST_USER,
+                recipient_list=[user.email],
+            )
 
             return redirect(self.success_url)
 
@@ -253,7 +260,7 @@ class AppointmentCreateView(LoginRequiredMixin, FormView):
             return self.form_invalid(form)
 
         except ValueError:
-            messages.error(self.request, 'Неверный формат даты или времени.')
+            messages.error(self.request, f'Неверный формат даты или времени. {ValueError}')
             return self.form_invalid(form)
 
     def form_invalid(self, form):

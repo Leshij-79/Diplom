@@ -78,6 +78,7 @@ class AppointmentAdmin(admin.ModelAdmin):
         "services",
         "status",
         "datetime",
+        "result",
     )
 
     list_filter = (

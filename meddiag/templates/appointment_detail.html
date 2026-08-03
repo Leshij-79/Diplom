@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Запись на прием - Медицинская Диагностика{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="section appointment-detail-section">
+    <div class="appointment-detail-container">
+        <!-- Хлебные крошки -->
+        <div class="breadcrumbs">
+            <a href="{% url 'meddiag:index' %}">Главная</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="{% url 'users:profile' user.pk %}">Личный кабинет</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Запись №{{ appointment.pk }}</span>
+        </div>
+
+        <!-- Статус записи -->
+        <div class="detail-status">
+            <span class="status-badge status-{{ appointment.status }}">
+                {% if appointment.status == 'active' %}
+                    <i class="fas fa-check-circle"></i> Активная запись
+                {% elif appointment.status == 'cancel' %}
+                    <i class="fas fa-times-circle"></i> Отменена
+                {% elif appointment.status == 'rendered' %}
+                    <i class="fas fa-check-circle"></i> Услуга оказана
+                {% endif %}
+            </span>
+        </div>
+
+        <!-- Информация о записи -->
+        <div class="detail-card">
+            <div class="detail-row">
+                <div class="detail-label"><i class="fas fa-stethoscope"></i> Услуга</div>
+                <div class="detail-value">{{ appointment.services.name }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label"><i class="fas fa-user-md"></i> Врач</div>
+                <div class="detail-value">
+                    {{ appointment.doctor.last_name }} {{ appointment.doctor.first_name }} {{ appointment.doctor.middle_name }}
+                    <span class="detail-sub">({{ appointment.doctor.specialization }})</span>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label"><i class="fas fa-calendar-day"></i> Дата</div>
+                <div class="detail-value">{{ appointment.datetime|date:"d.m.Y" }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label"><i class="fas fa-clock"></i> Время</div>
+                <div class="detail-value">{{ appointment.datetime|date:"H:i" }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label"><i class="fas fa-ruble-sign"></i> Стоимость</div>
+                <div class="detail-value">{{ appointment.services.price }} ₽</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label"><i class="fas fa-tag"></i> Направление</div>
+                <div class="detail-value">{{ appointment.services.direction.name }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label"><i class="fas fa-clock"></i> Длительность</div>
+                <div class="detail-value">{{ appointment.services.duration_execution }} минут</div>
+            </div>
+            {% if appointment.result %}
+            <div class="detail-row">
+                <div class="detail-label"><i class="fas fa-file-medical-alt"></i> Результат</div>
+                <div class="detail-value result-text">{{ appointment.result|linebreaks }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Результат диагностики (если оказана) -->
+        {% if appointment.status == 'rendered' and appointment.result %}
+        <div class="result-card">
+            <h3><i class="fas fa-file-medical-alt"></i> Результат диагностики</h3>
+            <p>{{ appointment.result|linebreaks }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Кнопки действий -->
+        <div class="detail-actions">
+            {% if appointment.status == 'active' %}
+            <button class="btn-cancel" onclick="cancelAppointment({{ appointment.pk }})">
+                <i class="fas fa-times"></i> Отменить запись
+            </button>
+            {% endif %}
+            <a href="{% url 'users:profile' user.pk %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Вернуться в кабинет
+            </a>
+        </div>
+    </div>
+</section>
+
+<script>
+function cancelAppointment(appointmentId) {
+    if (confirm('Вы уверены, что хотите отменить эту запись?')) {
+        fetch(`/appointment/cancel/${appointmentId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Ошибка: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Произошла ошибка. Попробуйте позже.');
+        });
+    }
+}
+</script>
+{% endblock %}

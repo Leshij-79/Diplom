@@ -81,14 +81,6 @@ class Doctors(models.Model):
         default=0,
     )
 
-    # specialization = models.ForeignKey(
-    #     Specialization,
-    #     on_delete=models.CASCADE,
-    #     related_name="specialization_doctor",
-    #     verbose_name="Специальность",
-    #     help_text="Специальность врача",
-    # )
-
     specialization = models.CharField(
         max_length=50,
         verbose_name="Специальность",
@@ -180,28 +172,6 @@ class Services(models.Model):
         return self.title
 
 
-# class Specialization(models.Model):
-#     title = models.CharField(
-#         max_length=50,
-#         verbose_name="Краткое наименование специальности врача",
-#         help_text="Краткое наименование специальности врача",
-#     )
-#
-#     name = models.CharField(
-#         max_length=150,
-#         verbose_name="Полное наименование специальности врача",
-#         help_text="Полное наименование специальности врача",
-#     )
-#
-#     class Meta:
-#         verbose_name = "Специальность"
-#         verbose_name_plural = "Специальности"
-#         ordering = ["title"]
-#
-#     def __str__(self):
-#         return self.title
-#
-
 class Appointment(models.Model):
     """
     Модель записи на приём пациента
@@ -246,6 +216,14 @@ class Appointment(models.Model):
     datetime = models.DateTimeField(
         verbose_name="Время оказания услуги",
         help_text="Укажите время оказания услуги",
+    )
+
+    result = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Результат диагностики",
+        help_text="Внесите результат диагностики",
+        default='',
     )
 
     class Meta:

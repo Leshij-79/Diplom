@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Личный кабинет - Медицинская Диагностика{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="section profile-section">
+    <div class="profile-container">
+        <!-- Заголовок -->
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="profile-title">
+                <h2>Личный кабинет</h2>
+                <p>{{ user.last_name }} {{ user.first_name }} {{ user.middle_name }}</p>
+                <p class="profile-email"><i class="fas fa-envelope"></i> {{ user.email }}</p>
+            </div>
+        </div>
+
+        <!-- Вкладки -->
+        <div class="profile-tabs">
+            <button class="tab-btn active" data-tab="appointments">
+                <i class="fas fa-calendar-check"></i> Мои записи
+            </button>
+            <button class="tab-btn" data-tab="history">
+                <i class="fas fa-history"></i> История
+            </button>
+            <button class="tab-btn" data-tab="settings">
+                <i class="fas fa-cog"></i> Настройки
+            </button>
+        </div>
+
+        <!-- Вкладка: Мои записи -->
+        <div class="tab-content active" id="tab-appointments">
+            <div class="appointments-list">
+                {% if active_appointments %}
+                    {% for appointment in active_appointments %}
+                    <div class="appointment-card {% if appointment.status == 'cancel' %}cancelled{% elif appointment.status == 'rendered' %}rendered{% else %}active{% endif %}">
+                        <div class="appointment-status">
+                            <span class="status-badge status-{{ appointment.status }}">
+                                {% if appointment.status == 'active' %}
+                                    <i class="fas fa-check-circle"></i> Активная
+                                {% elif appointment.status == 'cancel' %}
+                                    <i class="fas fa-times-circle"></i> Отменена
+                                {% elif appointment.status == 'rendered' %}
+                                    <i class="fas fa-check-circle"></i> Оказана
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="appointment-info">
+                            <h3>
+                                <a href="{% url 'meddiag:appointment_detail' appointment.pk %}">
+                                    {{ appointment.services.name }}
+                                </a>
+                            </h3>
+                            <div class="appointment-meta">
+                                <span class="meta-item">
+                                    <i class="fas fa-user-md"></i>
+                                    {{ appointment.doctor.last_name }} {{ appointment.doctor.first_name }} {{ appointment.doctor.middle_name }}
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-calendar-day"></i>
+                                    {{ appointment.datetime|date:"d.m.Y" }}
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    {{ appointment.datetime|date:"H:i" }}
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-ruble-sign"></i>
+                                    {{ appointment.services.price }} ₽
+                                </span>
+                            </div>
+                        </div>
+                        <div class="appointment-actions">
+                            <a href="{% url 'meddiag:appointment_detail' appointment.pk %}" class="btn-detail">
+                                <i class="fas fa-eye"></i> Подробнее
+                            </a>
+                            {% if appointment.status == 'active' %}
+                            <button class="btn-cancel-appointment" data-id="{{ appointment.pk }}">
+                                <i class="fas fa-times"></i> Отменить
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-plus"></i>
+                        <p>У вас нет активных записей</p>
+                        <a href="{% url 'meddiag:appointment_create' %}" class="btn-primary">
+                            <i class="fas fa-plus"></i> Записаться на прием
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Вкладка: История -->
+        <div class="tab-content" id="tab-history">
+            <div class="history-list">
+                {% if history_appointments %}
+                    {% for appointment in history_appointments %}
+                    <div class="history-item {% if appointment.status == 'rendered' %}rendered{% elif appointment.status == 'cancel' %}cancelled{% endif %}">
+                        <div class="history-status">
+                            <span class="status-badge status-{{ appointment.status }}">
+                                {% if appointment.status == 'rendered' %}
+                                    <i class="fas fa-check-circle"></i> Оказана
+                                {% elif appointment.status == 'cancel' %}
+                                    <i class="fas fa-times-circle"></i> Отменена
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="history-info">
+                            <h4>{{ appointment.services.name }}</h4>
+                            <p>
+                                {{ appointment.doctor.last_name }} {{ appointment.doctor.first_name }} |
+                                {{ appointment.datetime|date:"d.m.Y H:i" }}
+                            </p>
+                            <p class="history-price">{{ appointment.services.price }} ₽</p>
+                        </div>
+                        <a href="{% url 'meddiag:appointment_detail' appointment.pk %}" class="btn-detail-small">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-history"></i>
+                        <p>История записей пуста</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Вкладка: Настройки -->
+        <div class="tab-content" id="tab-settings">
+            <div class="settings-container">
+                <div class="settings-card">
+                    <h3><i class="fas fa-user"></i> Личные данные</h3>
+                    <form method="POST" action="{% url 'users:profile' user.pk %}" class="settings-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="last_name">Фамилия</label>
+                            <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="first_name">Имя</label>
+                            <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="middle_name">Отчество</label>
+                            <input type="text" id="middle_name" name="middle_name" value="{{ user.middle_name }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" value="{{ user.email }}" readonly disabled>
+                            <span class="field-hint">Email нельзя изменить</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone_number">Телефон</label>
+                            <input type="tel" id="phone_number" name="phone_number" value="{{ user.phone_number|default:'' }}">
+                        </div>
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i> Сохранить изменения
+                        </button>
+                    </form>
+                </div>
+
+                <div class="settings-card">
+                    <h3><i class="fas fa-lock"></i> Безопасность</h3>
+                    <a href="{% url 'users:password_reset' %}" class="btn-change-password">
+                        <i class="fas fa-key"></i> Сменить пароль
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Модальное окно подтверждения отмены -->
+<div class="modal-overlay" id="cancelModal">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3><i class="fas fa-exclamation-triangle"></i> Отмена записи</h3>
+            <button class="modal-close" onclick="closeCancelModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Вы уверены, что хотите отменить запись на прием?</p>
+            <p class="modal-warning">Это действие нельзя будет отменить.</p>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-confirm-cancel" id="confirmCancelBtn">
+                <i class="fas fa-check"></i> Да, отменить
+            </button>
+            <button class="btn-modal-close" onclick="closeCancelModal()">
+                <i class="fas fa-times"></i> Нет, оставить
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Переключение вкладок
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Удаляем активный класс у всех вкладок
+            tabs.forEach(t => t.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+
+            // Добавляем активный класс текущей вкладке
+            this.classList.add('active');
+            const tabId = this.dataset.tab;
+            document.getElementById('tab-' + tabId).classList.add('active');
+        });
+    });
+
+    // Отмена записи
+    const cancelModal = document.getElementById('cancelModal');
+    let appointmentIdToCancel = null;
+
+    document.querySelectorAll('.btn-cancel-appointment').forEach(btn => {
+        btn.addEventListener('click', function() {
+            appointmentIdToCancel = this.dataset.id;
+            cancelModal.classList.add('active');
+        });
+    });
+
+    document.getElementById('confirmCancelBtn').addEventListener('click', function() {
+        if (appointmentIdToCancel) {
+            fetch(`/appointment/cancel/${appointmentIdToCancel}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Ошибка при отмене записи: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Произошла ошибка. Попробуйте позже.');
+            });
+        }
+        closeCancelModal();
+    });
+});
+
+function closeCancelModal() {
+    document.getElementById('cancelModal').classList.remove('active');
+}
+
+function openAppointmentForm() {
+    window.location.href = "{% url 'meddiag:appointment_create' %}";
+}
+
+function openLoginForm() {
+    window.location.href = "{% url 'users:login' %}";
+}
+
+function openContactForm() {
+    window.location.href = "/contact-form";
+}
+</script>
+{% endblock %}
