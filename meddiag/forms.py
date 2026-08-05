@@ -2,7 +2,9 @@ from django import forms
 
 
 class AppointmentForm(forms.Form):
-    """Форма для записи на прием"""
+    """
+    Форма для записи на прием
+    """
 
     datetime = forms.DateTimeField(
         widget=forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"})
@@ -10,7 +12,9 @@ class AppointmentForm(forms.Form):
 
 
 class ContactForm(forms.Form):
-    """Форма обратной связи"""
+    """
+    Форма обратной связи
+    """
 
     name = forms.CharField(
         max_length=150,
@@ -18,7 +22,9 @@ class ContactForm(forms.Form):
         label="Ваше имя",
     )
     email = forms.EmailField(
-        widget=forms.EmailInput(attrs={"placeholder": "example@mail.ru", "class": "form-control"}), label="Email"
+        max_length=100,
+        widget=forms.EmailInput(attrs={"placeholder": "example@mail.ru", "class": "form-control"}),
+        label="Email",
     )
     phone = forms.CharField(
         max_length=20,
