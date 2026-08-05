@@ -233,3 +233,114 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"{self.patient} {self.services} {self.datetime} {self.status}"
+
+
+class AboutCompany(models.Model):
+    """
+    Модель раздела О компании
+    """
+    small_name = models.CharField(
+        max_length=100,
+        verbose_name="Название медицинской компании",
+        help_text="Укажите название медицинской компании",
+    )
+
+    full_name = models.CharField(
+        max_length=250,
+        verbose_name="Название медицинской компании",
+        help_text="Укажите название медицинской компании",
+    )
+
+    description = models.TextField(
+        verbose_name="Описание медицинской компании",
+        help_text="Укажите описание медицинской компании",
+    )
+
+    history = models.TextField(
+        verbose_name="История медицинской компании",
+        help_text="Укажите историю медицинской компании",
+    )
+
+    mission = models.TextField(
+        verbose_name="Миссия и ценности",
+        help_text="Укажите миссию и ценности",
+    )
+
+    doctors = models.TextField(
+        verbose_name="Команда врачей",
+        help_text="Опишите команду врачей",
+    )
+
+    image = models.ImageField(
+        upload_to="settings/",
+        blank=True,
+        null=True,
+        verbose_name="Эмблема медицинской компании",
+        help_text="Прикрепите эмблему медицинской компании",
+        default="settings/default.jpg",
+    )
+
+    small_image = models.ImageField(
+        upload_to="settings/small_default.png",
+        blank=True,
+        null=True,
+        verbose_name="Эмблема маленькая медицинской компании",
+        help_text="Прикрепите маленькую эмблему медицинской компании",
+        default="settings/default.jpg",
+    )
+
+    class Meta:
+        verbose_name = "О компании"
+        verbose_name_plural = "О компании"
+        ordering = ["small_name", "description"]
+
+    def __str__(self):
+        return f"{self.small_name} - {self.description}"
+
+
+class Contacts(models.Model):
+    """
+    Модель контактной информации компании
+    """
+    phone = models.CharField(
+        max_length=100,
+        verbose_name="Телефон",
+        help_text="Укажите номер телефона/ов",
+    )
+
+    email = models.CharField(
+        max_length=100,
+        verbose_name="Email",
+        help_text="Укажите email",
+    )
+
+    address = models.TextField(
+        verbose_name="Адрес",
+        help_text="Укажите адрес медицинской компании",
+    )
+
+    work_days = models.CharField(
+        max_length=30,
+        verbose_name="Рабочие дни недели",
+        help_text="Укажите рабочие дни недели",
+    )
+
+    hour_start = models.CharField(
+        max_length=2,
+        verbose_name="Час начала работы",
+        help_text="Укажите час начала работы",
+    )
+
+    hour_end = models.CharField(
+        max_length=2,
+        verbose_name="Час окончания работы",
+        help_text="Укажите час окончания работы",
+    )
+
+    class Meta:
+        verbose_name = "Настройки компании"
+        verbose_name_plural = "Настройки компании"
+        ordering = ["phone"]
+
+    def __str__(self):
+        return f"{self.phone}"

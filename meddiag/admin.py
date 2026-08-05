@@ -93,3 +93,33 @@ class AppointmentAdmin(admin.ModelAdmin):
         "doctor",
         "services",
     )
+
+
+class AboutCompanyAdmin(admin.ModelAdmin):
+    list_display = (
+        "small_name",
+        "full_name",
+        "description",
+        "history",
+        "mission",
+        "doctors",
+    )
+
+    list_filter = (
+        "small_name",
+    )
+
+    search_fields = (
+        "small_name",
+    )
+
+
+class ContactsAdmin(admin.ModelAdmin):
+    list_display = (
+    )
+
+    list_filter = (
+    )
+
+    search_fields = (
+    )

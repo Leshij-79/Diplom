@@ -4,7 +4,8 @@ from django.urls import path
 from config import settings
 from meddiag.apps import MeddiagConfig
 from meddiag.views import IndexListView, ServicesListView, ServiceDetailView, DoctorsListView, DoctorDetailView, \
-    AppointmentCreateView, AppointmentSuccessView, ProfileView, AppointmentDetailView, AppointmentCancelView
+    AppointmentCreateView, AppointmentSuccessView, ProfileView, AppointmentDetailView, AppointmentCancelView, AboutView, \
+    ContactsView
 
 app_name = MeddiagConfig.name
 
@@ -21,6 +22,8 @@ urlpatterns = [
     path("appointment/cancel/<int:pk>/", AppointmentCancelView.as_view(), name="appointment_cancel"),
     path("appointment/success/", AppointmentSuccessView.as_view(), name="appointment_success"),
     path("profile/", ProfileView.as_view(), name="profile"),
+    path("about/", AboutView.as_view(), name="about"),
+    path("contacts/", ContactsView.as_view(), name="contacts"),
 ]
 
 if settings.DEBUG:

@@ -352,3 +352,11 @@ class AppointmentCancelView(LoginRequiredMixin, TemplateView):
         )
 
         return redirect('meddiag:appointment_detail', pk=appointment.pk)
+
+
+class AboutView(ListView):
+    pass
+
+
+class ContactsView(ListView):
+    pass
