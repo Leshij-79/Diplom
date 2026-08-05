@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from meddiag.models import Direction, Services, Doctors, Appointment, AboutCompany, Contacts
+from meddiag.models import AboutCompany, Appointment, Contacts, Direction, Doctors, Services
 
 
 @admin.register(Direction)
@@ -11,13 +11,9 @@ class DirectionAdmin(admin.ModelAdmin):
         "name",
     )
 
-    list_filter = (
-        "name",
-    )
+    list_filter = ("name",)
 
-    search_fields = (
-        "name",
-    )
+    search_fields = ("name",)
 
 
 @admin.register(Services)
@@ -64,9 +60,7 @@ class DoctorsAdmin(admin.ModelAdmin):
         "direction",
     )
 
-    search_fields = (
-        "last_name",
-    )
+    search_fields = ("last_name",)
 
 
 @admin.register(Appointment)
@@ -108,13 +102,9 @@ class AboutCompanyAdmin(admin.ModelAdmin):
         "small_image",
     )
 
-    list_filter = (
-        "small_name",
-    )
+    list_filter = ("small_name",)
 
-    search_fields = (
-        "small_name",
-    )
+    search_fields = ("small_name",)
 
 
 @admin.register(Contacts)
@@ -133,10 +123,6 @@ class ContactsAdmin(admin.ModelAdmin):
         "map",
     )
 
-    list_filter = (
-        "phone",
-    )
+    list_filter = ("phone",)
 
-    search_fields = (
-        "phone",
-    )
+    search_fields = ("phone",)

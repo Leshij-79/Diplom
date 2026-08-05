@@ -1,25 +1,45 @@
 from django import forms
-from meddiag.models import Appointment, Services, Doctors
 
 
-class AppointmentForm(forms.ModelForm):
-    class Meta:
-        model = Appointment
-        fields = ['services', 'doctor', 'datetime']
-        widgets = {
-            'datetime': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-        }
+class AppointmentForm(forms.Form):
+    """Форма для записи на прием"""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Фильтруем врачей по выбранной услуге
-        if 'services' in self.data:
-            try:
-                service_id = int(self.data.get('services'))
-                self.fields['doctor'].queryset = Doctors.objects.filter(
-                    doctors_service__id=service_id
-                ).distinct()
-            except (ValueError, TypeError):
-                pass
-        elif self.instance.pk:
-            self.fields['doctor'].queryset = self.instance.services.doctors.all()
+    datetime = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"})
+    )
+
+
+class ContactForm(forms.Form):
+    """Форма обратной связи"""
+
+    name = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={"placeholder": "Иванов Иван", "class": "form-control"}),
+        label="Ваше имя",
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={"placeholder": "example@mail.ru", "class": "form-control"}), label="Email"
+    )
+    phone = forms.CharField(
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "+7 (999) 123-45-67", "class": "form-control"}),
+        label="Телефон",
+    )
+    subject = forms.ChoiceField(
+        choices=[
+            ("appointment", "Запись на прием"),
+            ("question", "Вопрос по услугам"),
+            ("complaint", "Жалоба или предложение"),
+            ("cooperation", "Сотрудничество"),
+            ("other", "Другое"),
+        ],
+        widget=forms.Select(attrs={"class": "form-control"}),
+        label="Тема обращения",
+    )
+    message = forms.CharField(
+        widget=forms.Textarea(
+            attrs={"rows": 6, "placeholder": "Опишите ваш вопрос или обращение...", "class": "form-control"}
+        ),
+        label="Сообщение",
+    )

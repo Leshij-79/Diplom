@@ -27,7 +27,4 @@ class CustomUserAdmin(UserAdmin):
         "phone_number",
     )
 
-    list_filter = (
-        "email",
-    )
-
+    list_filter = ("email",)

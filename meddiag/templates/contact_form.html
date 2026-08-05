@@ -30,7 +30,7 @@
                        value="{% if user.is_authenticated %}{{ user.last_name }} {{ user.first_name }}{% endif %}"
                        required>
                 {% if form.name.errors %}
-                <div class="field-error">{{ form.name.errors }}</div>
+                    <div class="field-error">{{ form.name.errors }}</div>
                 {% endif %}
             </div>
 
@@ -44,7 +44,7 @@
                        value="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
                        required>
                 {% if form.email.errors %}
-                <div class="field-error">{{ form.email.errors }}</div>
+                    <div class="field-error">{{ form.email.errors }}</div>
                 {% endif %}
             </div>
 
@@ -57,7 +57,7 @@
                        placeholder="+7 (999) 123-45-67"
                        value="{% if user.is_authenticated %}{{ user.phone_number|default:'' }}{% endif %}">
                 {% if form.phone.errors %}
-                <div class="field-error">{{ form.phone.errors }}</div>
+                    <div class="field-error">{{ form.phone.errors }}</div>
                 {% endif %}
             </div>
 
@@ -75,7 +75,7 @@
                     <option value="other">Другое</option>
                 </select>
                 {% if form.subject.errors %}
-                <div class="field-error">{{ form.subject.errors }}</div>
+                    <div class="field-error">{{ form.subject.errors }}</div>
                 {% endif %}
             </div>
 
@@ -87,25 +87,7 @@
                 <textarea id="message" name="message" rows="6"
                           placeholder="Опишите ваш вопрос или обращение..." required></textarea>
                 {% if form.message.errors %}
-                <div class="field-error">{{ form.message.errors }}</div>
-                {% endif %}
-            </div>
-
-            <!-- Капча (простая защита от спама) -->
-            <div class="form-group captcha-group">
-                <label for="captcha">
-                    <i class="fas fa-shield-alt"></i> Защита от спама <span class="required">*</span>
-                </label>
-                <div class="captcha-container">
-                    <span class="captcha-code">{{ captcha_code }}</span>
-                    <input type="text" id="captcha" name="captcha"
-                           placeholder="Введите код с картинки" required>
-                    <button type="button" class="captcha-refresh" onclick="refreshCaptcha()">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                </div>
-                {% if form.captcha.errors %}
-                <div class="field-error">{{ form.captcha.errors }}</div>
+                    <div class="field-error">{{ form.message.errors }}</div>
                 {% endif %}
             </div>
 
@@ -147,10 +129,10 @@
             <!-- Сообщения -->
             {% if messages %}
                 {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %}">
-                    <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% else %}info-circle{% endif %}"></i>
-                    {{ message }}
-                </div>
+                    <div class="alert alert-{% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %}">
+                        <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% else %}info-circle{% endif %}"></i>
+                        {{ message }}
+                    </div>
                 {% endfor %}
             {% endif %}
 
@@ -167,17 +149,6 @@
 </section>
 
 <script>
-// Обновление капчи
-function refreshCaptcha() {
-    fetch('{% url "meddiag:refresh_captcha" %}')
-        .then(response => response.json())
-        .then(data => {
-            document.querySelector('.captcha-code').textContent = data.captcha;
-        })
-        .catch(error => {
-            console.error('Ошибка обновления капчи:', error);
-        });
-}
 
 // Валидация формы перед отправкой
 document.getElementById('contactForm').addEventListener('submit', function(e) {
@@ -185,7 +156,6 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
     const email = document.getElementById('email').value.trim();
     const subject = document.getElementById('subject').value;
     const message = document.getElementById('message').value.trim();
-    const captcha = document.getElementById('captcha').value.trim();
 
     // Удаляем старые сообщения
     const oldAlerts = this.querySelectorAll('.alert');

@@ -6,9 +6,9 @@ class CompanyInfoMixin:
         context = super().get_context_data(**kwargs)
 
         about = AboutCompany.objects.first()
-        context['about_company'] = about
+        context["about_company"] = about
 
         contacts = Contacts.objects.first()
-        context['contacts'] = contacts
+        context["contacts"] = contacts
 
         return context

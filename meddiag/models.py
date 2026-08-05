@@ -1,5 +1,4 @@
 from django.db import models
-from django_filters.utils import verbose_field_name
 
 from users.models import CustomUser
 
@@ -8,6 +7,7 @@ class Direction(models.Model):
     """
     Модель направлений диагностики для группировки услуг по диагностике
     """
+
     title = models.CharField(
         max_length=50,
         verbose_name="Краткое наименование направления диагностики",
@@ -42,11 +42,12 @@ class Doctors(models.Model):
     """
     Модель по врачам с указанием их специализации, стажа и направления диагностики
     """
+
     STATUS_CATEGORY = [
         ("highest", "Высшая категория"),
         ("first", "Первая категория"),
         ("second", "Вторая категория"),
-        ("without","Без категории"),
+        ("without", "Без категории"),
     ]
 
     last_name = models.CharField(
@@ -117,6 +118,7 @@ class Services(models.Model):
     """
     Модель услуг по диагностике
     """
+
     title = models.CharField(
         max_length=50,
         verbose_name="Краткое наименование услуги",
@@ -144,7 +146,7 @@ class Services(models.Model):
 
     duration_execution = models.PositiveIntegerField(
         verbose_name="Продолжительность услуги в минутах",
-        help_text = "Укажите продолжительность выполнения медицинской услуги в минутах",
+        help_text="Укажите продолжительность выполнения медицинской услуги в минутах",
         default=10,
     )
 
@@ -176,6 +178,7 @@ class Appointment(models.Model):
     """
     Модель записи на приём пациента
     """
+
     STATUS = [
         ("active", "Активная"),
         ("rendered", "Оказана"),
@@ -223,7 +226,7 @@ class Appointment(models.Model):
         null=True,
         verbose_name="Результат диагностики",
         help_text="Внесите результат диагностики",
-        default='',
+        default="",
     )
 
     class Meta:
@@ -239,6 +242,7 @@ class AboutCompany(models.Model):
     """
     Модель раздела О компании
     """
+
     small_name = models.CharField(
         max_length=100,
         verbose_name="Короткое название медицинской компании",
@@ -302,6 +306,7 @@ class Contacts(models.Model):
     """
     Модель контактной информации компании
     """
+
     phone = models.CharField(
         max_length=100,
         verbose_name="Телефон",
