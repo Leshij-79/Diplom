@@ -2,7 +2,7 @@
 
 {% load static %}
 
-{% block title %}Запись на прием - Медицинская Диагностика{% endblock %}
+{% block title %}Запись на прием - {{ about_company.full_name }}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/appointment.css' %}">
@@ -58,7 +58,7 @@
                     <i class="fas fa-calendar-clock"></i> Дата и время <span class="required">*</span>
                 </label>
                 {{ form.datetime }}
-                <div class="field-hint">Рабочее время: 8:00 - 20:00</div>
+                <div class="field-hint">Рабочее время: {{ contacts.hour_start }}:00 - {{ contacts.hour_end }}:00</div>
                 {% if form.datetime.errors %}
                     <div class="field-error">{{ form.datetime.errors }}</div>
                 {% endif %}

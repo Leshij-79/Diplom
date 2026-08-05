@@ -1,14 +1,13 @@
 {% extends 'base.html' %}
 
-{% block title %}Главная - Медицинская Диагностика{% endblock %}
+{% block title %}Главная - {{ about_company.full_name }}{% endblock %}
 
 {% block content %}
 <!-- Hero секция -->
 <section class="hero">
     <h2>Забота о вашем здоровье</h2>
     <p>
-        Современная медицинская диагностика с использованием передовых технологий.
-        Точность, скорость и комфорт для каждого пациента.
+        {{ about_company.slogan }}
     </p>
     {% if user.is_authenticated %}
         <button class="btn-primary" onclick="openAppointmentForm()">Записаться на прием</button>

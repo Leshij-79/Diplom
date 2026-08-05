@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from meddiag.models import Direction, Services, Doctors, Appointment
+from meddiag.models import Direction, Services, Doctors, Appointment, AboutCompany, Contacts
 
 
 @admin.register(Direction)
@@ -95,11 +95,12 @@ class AppointmentAdmin(admin.ModelAdmin):
     )
 
 
+@admin.register(AboutCompany)
 class AboutCompanyAdmin(admin.ModelAdmin):
     list_display = (
         "small_name",
         "full_name",
-        "description",
+        "slogan",
         "history",
         "mission",
         "doctors",
@@ -116,6 +117,7 @@ class AboutCompanyAdmin(admin.ModelAdmin):
     )
 
 
+@admin.register(Contacts)
 class ContactsAdmin(admin.ModelAdmin):
     list_display = (
         "phone",

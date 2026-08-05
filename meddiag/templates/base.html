@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Медицинская Диагностика{% endblock %}</title>
+    <title>{% block title %}{{ about_company.full_name }}{% endblock %}</title>
 
     <!-- Шрифты -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -19,9 +19,9 @@
     <header class="header">
         <div class="header-container">
             <div class="logo">
-                <img src="/static/images/logo.png" alt="Логотип компании">
+                <img src="/media/{{ about_company.small_image }}" alt="Логотип компании">
                 <div>
-                    <h1>МедДиагностика</h1>
+                    <h1>{{ about_company.full_name }}</h1>
                     <span>Точная диагностика - залог здоровья</span>
                 </div>
             </div>

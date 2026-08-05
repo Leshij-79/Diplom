@@ -241,19 +241,19 @@ class AboutCompany(models.Model):
     """
     small_name = models.CharField(
         max_length=100,
-        verbose_name="Название медицинской компании",
-        help_text="Укажите название медицинской компании",
+        verbose_name="Короткое название медицинской компании",
+        help_text="Укажите короткое название медицинской компании",
     )
 
     full_name = models.CharField(
         max_length=250,
-        verbose_name="Название медицинской компании",
-        help_text="Укажите название медицинской компании",
+        verbose_name="Название полное медицинской компании",
+        help_text="Укажите полное название медицинской компании",
     )
 
-    description = models.TextField(
-        verbose_name="Описание медицинской компании",
-        help_text="Укажите описание медицинской компании",
+    slogan = models.TextField(
+        verbose_name="Cлоган медицинской компании",
+        help_text="Укажите слоган медицинской компании",
     )
 
     history = models.TextField(
@@ -292,10 +292,10 @@ class AboutCompany(models.Model):
     class Meta:
         verbose_name = "О компании"
         verbose_name_plural = "О компании"
-        ordering = ["small_name", "description"]
+        ordering = ["small_name", "slogan"]
 
     def __str__(self):
-        return f"{self.small_name} - {self.description}"
+        return f"{self.small_name} - {self.slogan}"
 
 
 class Contacts(models.Model):
@@ -364,8 +364,8 @@ class Contacts(models.Model):
     map = models.TextField(
         blank=True,
         null=True,
-        verbose_name="iframe cкрипт карты",
-        help_text="Вставьте iframe скрипт карты",
+        verbose_name="Код iframe cкрипт карты",
+        help_text="Вставьте код iframe скрипт карты",
     )
 
     class Meta:

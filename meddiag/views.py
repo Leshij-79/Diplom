@@ -9,15 +9,17 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, FormView, TemplateView
+from drf_yasg.openapi import Contact
 from icecream import ic
 
 from config.settings import EMAIL_HOST_USER
 from meddiag.forms import AppointmentForm
-from meddiag.models import Direction, Services, Doctors, Appointment
+from meddiag.mixins import CompanyInfoMixin
+from meddiag.models import Direction, Services, Doctors, Appointment, AboutCompany, Contacts
 from meddiag.services import ServicesServices
 
 
-class IndexListView(ListView):
+class IndexListView(CompanyInfoMixin, ListView):
     model = Direction
     template_name = 'index.html'
 
@@ -25,11 +27,11 @@ class IndexListView(ListView):
         return Direction.objects.all()
 
 
-class DirectionListView(ListView):
+class DirectionListView(CompanyInfoMixin, ListView):
     pass
 
 
-class ServicesListView(ListView):
+class ServicesListView(CompanyInfoMixin, ListView):
     model = Services
     template_name = 'services_list.html'
     context_object_name = 'services_list'
@@ -63,7 +65,7 @@ class ServicesListView(ListView):
         return context
 
 
-class ServiceDetailView(DetailView):
+class ServiceDetailView(CompanyInfoMixin, DetailView):
     model = Services
     template_name = 'service_detail.html'
     context_object_name = "service"
@@ -88,7 +90,7 @@ class ServiceDetailView(DetailView):
         return context
 
 
-class DoctorsListView(ListView):
+class DoctorsListView(CompanyInfoMixin, ListView):
     model = Doctors
     template_name = 'doctors_list.html'
     context_object_name = 'doctors_list'
@@ -120,7 +122,7 @@ class DoctorsListView(ListView):
         return context
 
 
-class DoctorDetailView(DetailView):
+class DoctorDetailView(CompanyInfoMixin, DetailView):
     model = Doctors
     template_name = 'doctor_detail.html'
     context_object_name = 'doctor'
@@ -144,7 +146,7 @@ class DoctorDetailView(DetailView):
         return context
 
 
-class AppointmentCreateView(LoginRequiredMixin, FormView):
+class AppointmentCreateView(CompanyInfoMixin, LoginRequiredMixin, FormView):
     template_name = 'appointment_create.html'
     form_class = AppointmentForm
     success_url = reverse_lazy('meddiag:appointment_success')
@@ -205,6 +207,7 @@ class AppointmentCreateView(LoginRequiredMixin, FormView):
         appointment_datetime = form.cleaned_data.get('datetime')
         service = get_object_or_404(Services, pk=service_id)
         doctor = get_object_or_404(Doctors, pk=doctor_id)
+        contacts = get_object_or_404(Contacts.objects.all()[:1])
 
         if not all([service, doctor, appointment_datetime]):
             messages.error(self.request, 'Пожалуйста, заполните все поля')
@@ -212,9 +215,9 @@ class AppointmentCreateView(LoginRequiredMixin, FormView):
 
         try:
 
-#TODO: поставить время из таблицы настроек
-
-            if appointment_datetime.hour < 8 or appointment_datetime.hour > 20:
+            # if appointment_datetime.hour < 8 or appointment_datetime.hour > 20:
+            if (appointment_datetime.hour < int(contacts.hour_start) or
+                    appointment_datetime.hour > int(contacts.hour_end)):
                 messages.error(self.request, 'Выбрано не рабочее время')
                 return self.form_invalid(form)
 
@@ -291,11 +294,11 @@ class AppointmentCreateView(LoginRequiredMixin, FormView):
         return initial
 
 
-class AppointmentSuccessView(LoginRequiredMixin, TemplateView):
+class AppointmentSuccessView(CompanyInfoMixin, LoginRequiredMixin, TemplateView):
     template_name = 'appointment_success.html'
 
 
-class ProfileView(LoginRequiredMixin, TemplateView):
+class ProfileView(CompanyInfoMixin, LoginRequiredMixin, TemplateView):
     model = Appointment
     template_name = 'profile.html'
     context_object_name = 'profile'
@@ -314,7 +317,7 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class AppointmentDetailView(LoginRequiredMixin, DetailView):
+class AppointmentDetailView(CompanyInfoMixin, LoginRequiredMixin, DetailView):
     model = Appointment
     template_name = 'appointment_detail.html'
     context_object_name = 'appointment_detail'
@@ -323,7 +326,7 @@ class AppointmentDetailView(LoginRequiredMixin, DetailView):
         return Appointment.objects.filter(patient=self.request.user)
 
 
-class AppointmentCancelView(LoginRequiredMixin, TemplateView):
+class AppointmentCancelView(CompanyInfoMixin, LoginRequiredMixin, TemplateView):
     model = Appointment
     template_name = 'appointment_cancel.html'
     context_object_name = 'appointment_cancel'
@@ -354,9 +357,19 @@ class AppointmentCancelView(LoginRequiredMixin, TemplateView):
         return redirect('meddiag:appointment_detail', pk=appointment.pk)
 
 
-class AboutView(ListView):
-    pass
+class AboutView(CompanyInfoMixin, TemplateView):
+    template_name = "about.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['about'] = AboutCompany.objects.first()
+        return context
 
 
-class ContactsView(ListView):
-    pass
+class ContactsView(CompanyInfoMixin, TemplateView):
+    template_name = "contacts.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['contacts'] = Contacts.objects.first()
+        return context

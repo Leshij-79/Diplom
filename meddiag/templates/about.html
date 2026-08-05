@@ -1,29 +1,57 @@
 {% extends 'base.html' %}
 
-{% block title %}Главная - Медицинская Диагностика{% endblock %}
+{% load static %}
+
+{% block title %}О компании - {{ about_company.full_name }}{% endblock %}
 
 {% block content %}
 
 <!-- Описание компании -->
 <section class="section" id="about">
     <h2>О компании</h2>
-    <div class="content">
-        <div>
-            <p style="margin-bottom: 1rem;">
-                <strong>МедДиагностика</strong> — это современный медицинский центр,
-                специализирующийся на комплексной диагностике заболеваний.
-            </p>
-            <p style="margin-bottom: 1rem;">
-                Наша команда состоит из опытных врачей и специалистов,
-                использующих новейшее оборудование для точной постановки диагноза.
-            </p>
-            <p>
-                Мы работаем с 2010 года и за это время помогли более 50 000
-                пациентам сохранить и улучшить свое здоровье.
-            </p>
+
+    {% if about %}
+        <div class="content">
+            <div>
+                <h3 style="color: #1a5276; margin-bottom: 0.5rem;">{{ about.full_name }}</h3>
+                <p style="font-size: 1.1rem; color: #2e86c1; margin-bottom: 1.5rem;">
+                    <i class="fas fa-quote-left"></i> {{ about.slogan }} <i class="fas fa-quote-right"></i>
+                </p>
+
+                <h4 style="color: #1a5276; margin: 1rem 0 0.5rem 0;"><i class="fas fa-history"></i> История</h4>
+                <p style="margin-bottom: 1rem;">{{ about.history|linebreaks }}</p>
+
+                <h4 style="color: #1a5276; margin: 1rem 0 0.5rem 0;"><i class="fas fa-bullseye"></i> Миссия и ценности</h4>
+                <p style="margin-bottom: 1rem;">{{ about.mission|linebreaks }}</p>
+
+                <h4 style="color: #1a5276; margin: 1rem 0 0.5rem 0;"><i class="fas fa-user-md"></i> Команда врачей</h4>
+                <p>{{ about.doctors|linebreaks }}</p>
+            </div>
+            {% if about.image %}
+                <img src="{{ about.image.url }}" alt="{{ about.small_name }}" style="width: 100%; border-radius: 12px;">
+            {% else %}
+                <img src="/static/images/about-us.jpg" alt="О компании">
+            {% endif %}
         </div>
-        <img src="/media/settings/about-us.jpg" alt="О компании">
-    </div>
+    {% else %}
+        <div class="content">
+            <div>
+                <p style="margin-bottom: 1rem;">
+                    <strong>МедДиагностика</strong> — это современный медицинский центр,
+                    специализирующийся на комплексной диагностике заболеваний.
+                </p>
+                <p style="margin-bottom: 1rem;">
+                    Наша команда состоит из опытных врачей и специалистов,
+                    использующих новейшее оборудование для точной постановки диагноза.
+                </p>
+                <p>
+                    Мы работаем с 2010 года и за это время помогли более 50 000
+                    пациентам сохранить и улучшить свое здоровье.
+                </p>
+            </div>
+            <img src="/static/images/about-us.jpg" alt="О компании">
+        </div>
+    {% endif %}
 </section>
 
 {% endblock %}
