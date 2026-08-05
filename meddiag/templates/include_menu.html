@@ -11,7 +11,7 @@
             <!-- Элементы для авторизованных пользователей -->
             {% if user.is_authenticated %}
                 <li class="auth-required" style="display: none;">
-                    <a href="/personal">Личный кабинет</a>
+                    <a href="/profile">Личный кабинет</a>
                 </li>
             {% endif %}
             {% if user.is_staff and user.is_superuser %}

@@ -15,19 +15,19 @@
         <div class="breadcrumbs">
             <a href="{% url 'meddiag:index' %}">Главная</a>
             <i class="fas fa-chevron-right"></i>
-            <a href="{% url 'users:profile' user.pk %}">Личный кабинет</a>
+            <a href="{% url 'meddiag:profile' %}">Личный кабинет</a>
             <i class="fas fa-chevron-right"></i>
-            <span>Запись №{{ appointment.pk }}</span>
+            <span>Запись №{{ appointment_detail.pk }}</span>
         </div>
 
         <!-- Статус записи -->
         <div class="detail-status">
-            <span class="status-badge status-{{ appointment.status }}">
-                {% if appointment.status == 'active' %}
+            <span class="status-badge status-{{ appointment_detail.status }}">
+                {% if appointment_detail.status == 'active' %}
                     <i class="fas fa-check-circle"></i> Активная запись
-                {% elif appointment.status == 'cancel' %}
+                {% elif appointment_detail.status == 'cancel' %}
                     <i class="fas fa-times-circle"></i> Отменена
-                {% elif appointment.status == 'rendered' %}
+                {% elif appointment_detail.status == 'rendered' %}
                     <i class="fas fa-check-circle"></i> Услуга оказана
                 {% endif %}
             </span>
@@ -42,81 +42,62 @@
             <div class="detail-row">
                 <div class="detail-label"><i class="fas fa-user-md"></i> Врач</div>
                 <div class="detail-value">
-                    {{ appointment.doctor.last_name }} {{ appointment.doctor.first_name }} {{ appointment.doctor.middle_name }}
-                    <span class="detail-sub">({{ appointment.doctor.specialization }})</span>
+                    {{ appointment_detail.doctor.last_name }} {{ appointment_detail.doctor.first_name }} {{ appointment_detail.doctor.middle_name }}
+                    <span class="detail-sub">({{ appointment_detail.doctor.specialization }})</span>
                 </div>
             </div>
             <div class="detail-row">
                 <div class="detail-label"><i class="fas fa-calendar-day"></i> Дата</div>
-                <div class="detail-value">{{ appointment.datetime|date:"d.m.Y" }}</div>
+                <div class="detail-value">{{ appointment_detail.datetime|date:"d.m.Y" }}</div>
             </div>
             <div class="detail-row">
                 <div class="detail-label"><i class="fas fa-clock"></i> Время</div>
-                <div class="detail-value">{{ appointment.datetime|date:"H:i" }}</div>
+                <div class="detail-value">{{ appointment_detail.datetime|date:"H:i" }}</div>
             </div>
             <div class="detail-row">
                 <div class="detail-label"><i class="fas fa-ruble-sign"></i> Стоимость</div>
-                <div class="detail-value">{{ appointment.services.price }} ₽</div>
+                <div class="detail-value">{{ appointment_detail.services.price }} ₽</div>
             </div>
             <div class="detail-row">
                 <div class="detail-label"><i class="fas fa-tag"></i> Направление</div>
-                <div class="detail-value">{{ appointment.services.direction.name }}</div>
+                <div class="detail-value">{{ appointment_detail.services.direction.name }}</div>
             </div>
             <div class="detail-row">
                 <div class="detail-label"><i class="fas fa-clock"></i> Длительность</div>
-                <div class="detail-value">{{ appointment.services.duration_execution }} минут</div>
+                <div class="detail-value">{{ appointment_detail.services.duration_execution }} минут</div>
             </div>
-            {% if appointment.result %}
+            {% if appointment_detail.result %}
             <div class="detail-row">
                 <div class="detail-label"><i class="fas fa-file-medical-alt"></i> Результат</div>
-                <div class="detail-value result-text">{{ appointment.result|linebreaks }}</div>
+                <div class="detail-value result-text">{{ appointment_detail.result|linebreaks }}</div>
             </div>
             {% endif %}
         </div>
 
         <!-- Результат диагностики (если оказана) -->
-        {% if appointment.status == 'rendered' and appointment.result %}
+        {% if appointment_detail.status == 'rendered' and appointment_detail.result %}
         <div class="result-card">
             <h3><i class="fas fa-file-medical-alt"></i> Результат диагностики</h3>
-            <p>{{ appointment.result|linebreaks }}</p>
+            <p>{{ appointment_detail.result|linebreaks }}</p>
         </div>
         {% endif %}
 
         <!-- Кнопки действий -->
         <div class="detail-actions">
-            {% if appointment.status == 'active' %}
-            <button class="btn-cancel" onclick="cancelAppointment({{ appointment.pk }})">
-                <i class="fas fa-times"></i> Отменить запись
-            </button>
+            {% if appointment_detail.status == 'active' %}
+                <form method="POST" action="{% url 'meddiag:appointment_cancel' appointment_detail.pk %}"
+                      style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-cancel" onclick="return confirm('Вы уверены, что хотите отменить эту запись?')">
+                        <i class="fas fa-times"></i> Отменить запись
+                    </button>
+                </form>
             {% endif %}
-            <a href="{% url 'users:profile' user.pk %}" class="btn-back">
+            <a href="{% url 'meddiag:profile' %}" class="btn-back">
                 <i class="fas fa-arrow-left"></i> Вернуться в кабинет
             </a>
         </div>
     </div>
 </section>
 
-<script>
-function cancelAppointment(appointmentId) {
-    if (confirm('Вы уверены, что хотите отменить эту запись?')) {
-        fetch(`/appointment/cancel/${appointmentId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Ошибка: ' + data.error);
-            }
-        })
-        .catch(error => {
-            alert('Произошла ошибка. Попробуйте позже.');
-        });
-    }
-}
-</script>
 {% endblock %}

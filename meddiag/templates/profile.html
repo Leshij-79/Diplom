@@ -31,16 +31,13 @@
             <button class="tab-btn" data-tab="history">
                 <i class="fas fa-history"></i> История
             </button>
-            <button class="tab-btn" data-tab="settings">
-                <i class="fas fa-cog"></i> Настройки
-            </button>
         </div>
 
         <!-- Вкладка: Мои записи -->
         <div class="tab-content active" id="tab-appointments">
             <div class="appointments-list">
-                {% if active_appointments %}
-                    {% for appointment in active_appointments %}
+                {% if appointments_active %}
+                    {% for appointment in appointments_active %}
                     <div class="appointment-card {% if appointment.status == 'cancel' %}cancelled{% elif appointment.status == 'rendered' %}rendered{% else %}active{% endif %}">
                         <div class="appointment-status">
                             <span class="status-badge status-{{ appointment.status }}">
@@ -82,11 +79,6 @@
                             <a href="{% url 'meddiag:appointment_detail' appointment.pk %}" class="btn-detail">
                                 <i class="fas fa-eye"></i> Подробнее
                             </a>
-                            {% if appointment.status == 'active' %}
-                            <button class="btn-cancel-appointment" data-id="{{ appointment.pk }}">
-                                <i class="fas fa-times"></i> Отменить
-                            </button>
-                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}
@@ -105,8 +97,8 @@
         <!-- Вкладка: История -->
         <div class="tab-content" id="tab-history">
             <div class="history-list">
-                {% if history_appointments %}
-                    {% for appointment in history_appointments %}
+                {% if appointment_archive %}
+                    {% for appointment in appointment_archive %}
                     <div class="history-item {% if appointment.status == 'rendered' %}rendered{% elif appointment.status == 'cancel' %}cancelled{% endif %}">
                         <div class="history-status">
                             <span class="status-badge status-{{ appointment.status }}">
@@ -125,8 +117,8 @@
                             </p>
                             <p class="history-price">{{ appointment.services.price }} ₽</p>
                         </div>
-                        <a href="{% url 'meddiag:appointment_detail' appointment.pk %}" class="btn-detail-small">
-                            <i class="fas fa-eye"></i>
+                        <a href="{% url 'meddiag:appointment_detail' appointment.pk %}" class="btn-detail">
+                            <i class="fas fa-eye"></i> Подробнее
                         </a>
                     </div>
                     {% endfor %}
@@ -138,73 +130,8 @@
                 {% endif %}
             </div>
         </div>
-
-        <!-- Вкладка: Настройки -->
-        <div class="tab-content" id="tab-settings">
-            <div class="settings-container">
-                <div class="settings-card">
-                    <h3><i class="fas fa-user"></i> Личные данные</h3>
-                    <form method="POST" action="{% url 'users:profile' user.pk %}" class="settings-form">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="last_name">Фамилия</label>
-                            <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="first_name">Имя</label>
-                            <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="middle_name">Отчество</label>
-                            <input type="text" id="middle_name" name="middle_name" value="{{ user.middle_name }}">
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" name="email" value="{{ user.email }}" readonly disabled>
-                            <span class="field-hint">Email нельзя изменить</span>
-                        </div>
-                        <div class="form-group">
-                            <label for="phone_number">Телефон</label>
-                            <input type="tel" id="phone_number" name="phone_number" value="{{ user.phone_number|default:'' }}">
-                        </div>
-                        <button type="submit" class="btn-save">
-                            <i class="fas fa-save"></i> Сохранить изменения
-                        </button>
-                    </form>
-                </div>
-
-                <div class="settings-card">
-                    <h3><i class="fas fa-lock"></i> Безопасность</h3>
-                    <a href="{% url 'users:password_reset' %}" class="btn-change-password">
-                        <i class="fas fa-key"></i> Сменить пароль
-                    </a>
-                </div>
-            </div>
-        </div>
     </div>
 </section>
-
-<!-- Модальное окно подтверждения отмены -->
-<div class="modal-overlay" id="cancelModal">
-    <div class="modal-container">
-        <div class="modal-header">
-            <h3><i class="fas fa-exclamation-triangle"></i> Отмена записи</h3>
-            <button class="modal-close" onclick="closeCancelModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <p>Вы уверены, что хотите отменить запись на прием?</p>
-            <p class="modal-warning">Это действие нельзя будет отменить.</p>
-        </div>
-        <div class="modal-actions">
-            <button class="btn-confirm-cancel" id="confirmCancelBtn">
-                <i class="fas fa-check"></i> Да, отменить
-            </button>
-            <button class="btn-modal-close" onclick="closeCancelModal()">
-                <i class="fas fa-times"></i> Нет, оставить
-            </button>
-        </div>
-    </div>
-</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

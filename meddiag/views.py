@@ -5,6 +5,7 @@ from typing import Any
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, FormView, TemplateView
@@ -292,3 +293,62 @@ class AppointmentCreateView(LoginRequiredMixin, FormView):
 
 class AppointmentSuccessView(LoginRequiredMixin, TemplateView):
     template_name = 'appointment_success.html'
+
+
+class ProfileView(LoginRequiredMixin, TemplateView):
+    model = Appointment
+    template_name = 'profile.html'
+    context_object_name = 'profile'
+    success_url = reverse_lazy('meddiag:profile')
+
+    def get_object(self):
+        return self.request.user
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['appointments_active'] = (Appointment.objects.filter(patient=self.request.user).
+                                          exclude(status='cancel').exclude(status='rendered'))
+        context['appointment_archive'] = Appointment.objects.filter(patient=self.request.user).exclude(status='active')
+
+        return context
+
+
+class AppointmentDetailView(LoginRequiredMixin, DetailView):
+    model = Appointment
+    template_name = 'appointment_detail.html'
+    context_object_name = 'appointment_detail'
+
+    def get_queryset(self):
+        return Appointment.objects.filter(patient=self.request.user)
+
+
+class AppointmentCancelView(LoginRequiredMixin, TemplateView):
+    model = Appointment
+    template_name = 'appointment_cancel.html'
+    context_object_name = 'appointment_cancel'
+
+    def post(self, request, *args, **kwargs):
+        appointment = get_object_or_404(Appointment, patient=self.request.user, pk=kwargs['pk'])
+
+        if appointment.status == 'active':
+            appointment.status = 'cancel'
+            appointment.save()
+            messages.success(request, 'Запись успешно отменена')
+        else:
+            messages.error(request, 'Запись уже отменена или оказана')
+
+        message_information = (f'Вы успешно отменили запись к врачу {appointment.doctor.last_name} '
+                               f'{appointment.doctor.first_name} {appointment.doctor.middle_name} на '
+                               f'{appointment.services.name} в {appointment.datetime.strftime("%d.%m.%Y %H:%M")}')
+        messages.success(self.request, message_information)
+
+        user = self.request.user
+        send_mail(
+            subject="Отмена записи на приём",
+            message=message_information,
+            from_email=EMAIL_HOST_USER,
+            recipient_list=[user.email],
+        )
+
+        return redirect('meddiag:appointment_detail', pk=appointment.pk)

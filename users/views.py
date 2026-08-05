@@ -83,92 +83,92 @@ class RegisterView(FormView):
         return super().form_valid(form)
 
 
-class UserProfileView(UpdateView):
-    model = CustomUser
-    template_name = "profile.html"
-    form_class = CustomUserProfileForm
-    success_url = reverse_lazy("meddiag:index")
-
-    def get_object(self):
-        return self.request.user
-
-
-class UserPasswordResetView(FormView):
-    template_name = "password_reset.html"
-    form_class = CustomPasswordResetForm
-    success_url = reverse_lazy("meddiag:index")
-
-    def form_valid(self, form):
-        email = form.cleaned_data["email"]
-        user = get_object_or_404(CustomUser, email=email)
-
-        token = secrets.token_hex(16)  # 16 - шкала чисел
-        user.token = token
-        user.save()
-
-        host = self.request.get_host()
-        url = f"http://{host}/users/password_reset/{token}/"
-        send_mail(
-            subject="Восстановление пароля на сайте",
-            message=f"Для завершения восстановления пароля перейдите по ссылке {url}",
-            from_email=EMAIL_HOST_USER,
-            recipient_list=[user.email],
-        )
-
-        messages.success(self.request, "Письмо для восстановления пароля было отправлено на ваш электронный адрес.")
-
-        return super().form_valid(form)
+# class UserProfileView(UpdateView):
+#     model = CustomUser
+#     template_name = "profile.html"
+#     form_class = CustomUserProfileForm
+#     success_url = reverse_lazy("meddiag:index")
+#
+#     def get_object(self):
+#         return self.request.user
 
 
-def password_confirm(request, token):
-    user = get_object_or_404(CustomUser, token=token)
-
-    if request.method == "POST":
-        form = CustomPasswordSetForm(user, request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect(reverse("users:login"))
-    else:
-        form = CustomPasswordSetForm(user)
-
-    template_name = "password_reset_confirm.html"
-    return render(request, template_name, {"form": form})
-
-
-class UsersListView(LoginRequiredMixin, ListView):
-    template_name = "users_list.html"
-    form_class = UsersListForm
-    context_object_name = "objects_list"
-    success_url = reverse_lazy("meddiag:index")
-
-    def get_queryset(self):
-        queryset = CustomUser.objects.all()
-        user = self.request.user
-
-        if user.groups.filter(name="Moderator").exists():
-            return queryset.exclude(pk=user.pk)
-
-        raise PermissionDenied("У вас недостаточно прав")
-        return queryset.none()
+# class UserPasswordResetView(FormView):
+#     template_name = "password_reset.html"
+#     form_class = CustomPasswordResetForm
+#     success_url = reverse_lazy("meddiag:index")
+#
+#     def form_valid(self, form):
+#         email = form.cleaned_data["email"]
+#         user = get_object_or_404(CustomUser, email=email)
+#
+#         token = secrets.token_hex(16)  # 16 - шкала чисел
+#         user.token = token
+#         user.save()
+#
+#         host = self.request.get_host()
+#         url = f"http://{host}/users/password_reset/{token}/"
+#         send_mail(
+#             subject="Восстановление пароля на сайте",
+#             message=f"Для завершения восстановления пароля перейдите по ссылке {url}",
+#             from_email=EMAIL_HOST_USER,
+#             recipient_list=[user.email],
+#         )
+#
+#         messages.success(self.request, "Письмо для восстановления пароля было отправлено на ваш электронный адрес.")
+#
+#         return super().form_valid(form)
 
 
-class UserDetailView(LoginRequiredMixin, DetailView):
-    model = CustomUser
-    template_name = "user_detail.html"
-    context_object_name = "user_detail"
-    form_class = UsersListForm
-    success_url = reverse_lazy("users:users_list")
+# def password_confirm(request, token):
+#     user = get_object_or_404(CustomUser, token=token)
+#
+#     if request.method == "POST":
+#         form = CustomPasswordSetForm(user, request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return redirect(reverse("users:login"))
+#     else:
+#         form = CustomPasswordSetForm(user)
+#
+#     template_name = "password_reset_confirm.html"
+#     return render(request, template_name, {"form": form})
 
 
-def user_diactive(request, pk):
-    user = get_object_or_404(CustomUser, pk=pk)
-    user.is_active = False
-    user.save()
-    return redirect(reverse("users:user_detail", args=[pk]))
-
-
-def user_active(request, pk):
-    user = get_object_or_404(CustomUser, pk=pk)
-    user.is_active = True
-    user.save()
-    return redirect(reverse("users:user_detail", args=[pk]))
+# class UsersListView(LoginRequiredMixin, ListView):
+#     template_name = "users_list.html"
+#     form_class = UsersListForm
+#     context_object_name = "objects_list"
+#     success_url = reverse_lazy("meddiag:index")
+#
+#     def get_queryset(self):
+#         queryset = CustomUser.objects.all()
+#         user = self.request.user
+#
+#         if user.groups.filter(name="Moderator").exists():
+#             return queryset.exclude(pk=user.pk)
+#
+#         raise PermissionDenied("У вас недостаточно прав")
+#         return queryset.none()
+#
+#
+# class UserDetailView(LoginRequiredMixin, DetailView):
+#     model = CustomUser
+#     template_name = "user_detail.html"
+#     context_object_name = "user_detail"
+#     form_class = UsersListForm
+#     success_url = reverse_lazy("users:users_list")
+#
+#
+# def user_diactive(request, pk):
+#     user = get_object_or_404(CustomUser, pk=pk)
+#     user.is_active = False
+#     user.save()
+#     return redirect(reverse("users:user_detail", args=[pk]))
+#
+#
+# def user_active(request, pk):
+#     user = get_object_or_404(CustomUser, pk=pk)
+#     user.is_active = True
+#     user.save()
+#     return redirect(reverse("users:user_detail", args=[pk]))
