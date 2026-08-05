@@ -281,12 +281,12 @@ class AboutCompany(models.Model):
     )
 
     small_image = models.ImageField(
-        upload_to="settings/small_default.png",
+        upload_to="settings/",
         blank=True,
         null=True,
         verbose_name="Эмблема маленькая медицинской компании",
         help_text="Прикрепите маленькую эмблему медицинской компании",
-        default="settings/default.jpg",
+        default="settings/small_default.png",
     )
 
     class Meta:
@@ -335,6 +335,37 @@ class Contacts(models.Model):
         max_length=2,
         verbose_name="Час окончания работы",
         help_text="Укажите час окончания работы",
+    )
+
+    work_days_second = models.CharField(
+        max_length=30,
+        verbose_name="Не основные рабочие дни недели",
+        help_text="Укажите не основные рабочие дни недели",
+    )
+
+    hour_start_second = models.CharField(
+        max_length=2,
+        verbose_name="Не основной час начала работы",
+        help_text="Укажите не основной час начала работы",
+    )
+
+    hour_end_second = models.CharField(
+        max_length=2,
+        verbose_name="Не основной час окончания работы",
+        help_text="Укажите не основой час окончания работы",
+    )
+
+    weekend = models.CharField(
+        max_length=30,
+        verbose_name="выходные дни недели",
+        help_text="Укажите выходные дни недели",
+    )
+
+    map = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="iframe cкрипт карты",
+        help_text="Вставьте iframe скрипт карты",
     )
 
     class Meta:

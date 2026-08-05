@@ -103,6 +103,8 @@ class AboutCompanyAdmin(admin.ModelAdmin):
         "history",
         "mission",
         "doctors",
+        "image",
+        "small_image",
     )
 
     list_filter = (
@@ -116,10 +118,23 @@ class AboutCompanyAdmin(admin.ModelAdmin):
 
 class ContactsAdmin(admin.ModelAdmin):
     list_display = (
+        "phone",
+        "email",
+        "address",
+        "work_days",
+        "hour_start",
+        "hour_end",
+        "work_days_second",
+        "hour_start_second",
+        "hour_end_second",
+        "weekend",
+        "map",
     )
 
     list_filter = (
+        "phone",
     )
 
     search_fields = (
+        "phone",
     )
