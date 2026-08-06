@@ -63,31 +63,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
             cd ${{ secrets.DEPLOY_DIR }}
 
-            # ВАЖНО: Загружаем переменные из .env в окружение
-            set -a
-            source .env
-            set +a
-          
-            export DJANGO_SETTINGS_MODULE=config.settings
-
-            # Абзац не обязателен psycopg2 должен работать
-            sudo chown -R ${{ secrets.SSH_USER }}:${{ secrets.SSH_USER }} .
-            sudo chmod -R 755 .
-            rm -rf venv
-            python3.14 -m venv venv
-            source venv/bin/activate
-            python3.14 -m pip install --upgrade pip
-      
-            mkdir -p staticfiles
-            cp -r staticfiles/* ${{ secrets.DEPLOY_DIR }}/staticfiles/ 2>/dev/null || true
-            python manage.py migrate  # не обязательно, тк это уже есть в docker-compose.yml
-            python manage.py collectstatic --noinput  # можно добавить ключ -с # есть в docker-compose
-          
-            # Копируем статику в место для nginx # проверить, не обязательно а также имена папок
-            sudo mkdir -p /usr/share/nginx/html/static
-            sudo cp -r staticfiles/* /usr/share/nginx/html/static/ 2>/dev/null || true
-            sudo chown -R ${{ secrets.SSH_USER }}:${{ secrets.SSH_USER }} /usr/share/nginx/html/static
-          
+                    
             # Перезапускаем контейнеры
             docker-compose down
             docker-compose up -d --build
