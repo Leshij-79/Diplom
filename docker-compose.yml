@@ -54,6 +54,9 @@ services:
 
   celery:
     build: .
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     command: celery -A config worker --loglevel=info
     env_file:
       - .env
@@ -68,6 +71,9 @@ services:
 
   celery-beat:
     build: .
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     command: celery -A config beat --loglevel=info
     env_file:
       - .env
@@ -87,6 +93,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.nginx
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     ports:
       - "80:80"
     volumes:
