@@ -22,10 +22,6 @@ class IndexListView(CompanyInfoMixin, ListView):
         return Direction.objects.all()
 
 
-class DirectionListView(CompanyInfoMixin, ListView):
-    pass
-
-
 class ServicesListView(CompanyInfoMixin, ListView):
     model = Services
     template_name = "services_list.html"
@@ -44,11 +40,9 @@ class ServicesListView(CompanyInfoMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["directions"] = Direction.objects.all()
 
-        # Добавляем ID текущей категории
         direction_id = self.kwargs.get("pk")
         context["current_category_id"] = direction_id
 
-        # Добавляем текущую категорию для отображения названия
         if direction_id:
             try:
                 context["current_direction"] = Direction.objects.get(pk=direction_id)
@@ -181,7 +175,6 @@ class AppointmentCreateView(CompanyInfoMixin, LoginRequiredMixin, FormView):
                     }
                 )
 
-            # Добавляем список врачей для этого сервиса
             doctor_for_service[str(service.id)] = doctor_list
 
         context["doctor_for_service"] = json.dumps(doctor_for_service)
@@ -212,7 +205,6 @@ class AppointmentCreateView(CompanyInfoMixin, LoginRequiredMixin, FormView):
 
         try:
 
-            # if appointment_datetime.hour < 8 or appointment_datetime.hour > 20:
             if appointment_datetime.hour < int(contacts.hour_start) or appointment_datetime.hour > int(
                 contacts.hour_end
             ):
@@ -271,7 +263,6 @@ class AppointmentCreateView(CompanyInfoMixin, LoginRequiredMixin, FormView):
     def get_initial(self):
         initial = super().get_initial()
 
-        # Получаем параметры из GET-запроса
         service_id = self.request.GET.get("service")
         doctor_id = self.request.GET.get("doctor")
 
