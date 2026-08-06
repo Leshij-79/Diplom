@@ -28,12 +28,27 @@ jobs:
           fetch-depth: 0  # Загружаем всю историю
           ref: Feature/Diplom       # Явно указываем ветку
 
+      - name: Create .env file locally
+        run: |
+          cat > .env << 'ENVEOF'
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_HOST=${{ secrets.DB_HOST }}
+          DB_PORT=${{ secrets.DB_PORT }}
+          EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}
+          EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
+          CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}
+          CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}
+          REDIS_HOST=${{ secrets.REDIS_HOST }}
+          ENVEOF
+
       - name: Copy project files to server
         run: |
           rsync -avzu --rsync-path="sudo rsync" \
           --delete \
           --exclude '__pycache__' \
-          --exclude='.env' \
           --exclude='venv' \
           --exclude='*.pyc' \
           --exclude='.git' \
@@ -48,25 +63,6 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
             cd ${{ secrets.DEPLOY_DIR }}
 
-            python3 -c '
-            import os
-            env_vars = {
-              "SECRET_KEY": "${{ secrets.SECRET_KEY }}",
-              "DB_NAME": "${{ secrets.DB_NAME }}",
-              "DB_USER": "${{ secrets.DB_USER }}",
-              "DB_PASSWORD": "${{ secrets.DB_PASSWORD }}",
-              "DB_HOST": "${{ secrets.DB_HOST }}",
-              "DB_PORT": "${{ secrets.DB_PORT }}",
-              "EMAIL_HOST_USER": "${{ secrets.EMAIL_HOST_USER }}",
-              "EMAIL_HOST_PASSWORD": "${{ secrets.EMAIL_HOST_PASSWORD }}",
-              "CELERY_BROKER_URL": "${{ secrets.CELERY_BROKER_URL }}",
-              "CELERY_RESULT_BACKEND": "${{ secrets.CELERY_RESULT_BACKEND }}",
-              "REDIS_HOST": "${{ secrets.REDIS_HOST }}"
-            }
-            with open(".env", "w") as f:
-                for key, value in env_vars.items():
-                    f.write(f"{key}={value}\n")
-            '
             # ВАЖНО: Загружаем переменные из .env в окружение
             set -a
             source .env
