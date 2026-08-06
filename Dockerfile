@@ -7,7 +7,9 @@ RUN pip install --no-cache-dir poetry
 
 COPY pyproject.toml poetry.lock ./
 
-RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi --no-root --only main
+RUN poetry config repositories.pypi https://pypi.org/simple/ && \
+    poetry config virtualenvs.create false && \
+    poetry install --no-interaction --no-ansi --no-root --only main --verbose
 
 COPY . .
 
