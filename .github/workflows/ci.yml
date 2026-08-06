@@ -1,0 +1,244 @@
+name: Django CI/CD Pipeline
+
+on:   # [push, pull_request]
+  push:
+    branches:
+      - Feature/Kurs
+
+  pull_request:
+    branches:
+      - Develop
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Configure Poetry
+        run: |
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project true
+
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+            venv-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: |
+          poetry install --no-interaction --no-root
+
+      - name: Run linters
+        run: |
+          poetry run flake8 kurs5
+          poetry run flake8 users  
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: kurs5
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.14'
+        cache: 'pip'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libpq-dev file postgresql-client
+
+    - name: Cache Poetry dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pypoetry
+        key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}-v2
+        restore-keys: |
+          ${{ runner.os }}-poetry-
+
+    - name: Install Poetry
+      run: pipx install poetry
+
+    - name: Configure Poetry
+      run: |
+        poetry config virtualenvs.in-project true
+
+    - name: Install dependencies
+      run: |
+        poetry install --no-interaction --no-root
+
+    - name: Create static directory
+      run: |
+        mkdir -p static
+
+    - name: Set environment variables directly
+      run: |
+        echo "SECRET_KEY=django-insecure-ci-test-key" >> $GITHUB_ENV
+        echo "DB_NAME=kurs5" >> $GITHUB_ENV
+        echo "DB_USER=postgres" >> $GITHUB_ENV
+        echo "DB_PASSWORD=postgres" >> $GITHUB_ENV
+        echo "DB_HOST=127.0.0.1" >> $GITHUB_ENV
+        echo "DB_PORT=5432" >> $GITHUB_ENV
+        echo "EMAIL_HOST_USER=test@example.com" >> $GITHUB_ENV
+        echo "EMAIL_HOST_PASSWORD=test_password" >> $GITHUB_ENV
+        echo "CELERY_BROKER_URL=redis://127.0.0.1:6379/0" >> $GITHUB_ENV
+        echo "CELERY_RESULT_BACKEND=redis://127.0.0.1:6379/0" >> $GITHUB_ENV
+        echo "REDIS_HOST=127.0.0.1" >> $GITHUB_ENV
+        echo "GITHUB_ACTIONS=true" >> $GITHUB_ENV
+
+    - name: Set Python path
+      run: |
+        echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
+
+    - name: Wait for Postgres to be ready
+      run: |
+        echo "Waiting for Postgres to be ready..."
+        for i in {1..30}; do
+          if pg_isready -h 127.0.0.1 -p 5432 -U postgres; then
+            echo "Postgres is ready!"
+            break
+          fi
+          echo "Waiting for Postgres... ($i/30)"
+          sleep 2
+        done
+
+    - name: Run migrations
+      run: |
+        export PYTHONPATH=$PWD
+        poetry run python manage.py migrate
+
+    - name: Run tests
+      run: |
+        export PYTHONPATH=$PWD
+        poetry run python manage.py test
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Загружаем всю историю
+          ref: Feature/Kurs       # Явно указываем ветку
+
+      - name: Copy project files to server
+        run: |
+          rsync -avzu --rsync-path="sudo rsync" \
+          --delete \
+          --exclude '__pycache__' \
+          --exclude='.env' \
+          --exclude='venv' \
+          --exclude='*.pyc' \
+          --exclude='.git' \
+          --exclude='.github' \
+          --exclude='media' \
+          --exclude='staticfiles' \
+          --chown=${{ secrets.SSH_USER }}:${{ secrets.SSH_USER }} \
+          ./ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
+
+      - name: Deploy application
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            cd ${{ secrets.DEPLOY_DIR }}
+
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > .env
+            echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
+            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+            echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> .env
+            echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> .env
+            echo "CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}" >> .env
+            echo "CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}" >> .env
+            echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+            # ВАЖНО: Загружаем переменные из .env в окружение
+            set -a
+            source .env
+            set +a
+          
+            export DJANGO_SETTINGS_MODULE=config.settings
+
+            # Абзац не обязателен psycopg2 должен работать
+            sudo chown -R ${{ secrets.SSH_USER }}:${{ secrets.SSH_USER }} .
+            sudo chmod -R 755 .
+            rm -rf venv
+            python3.14 -m venv venv
+            source venv/bin/activate
+            python3.14 -m pip install --upgrade pip
+      
+            mkdir -p staticfiles
+            cp -r staticfiles/* ${{ secrets.DEPLOY_DIR }}/staticfiles/ 2>/dev/null || true
+            python manage.py migrate  # не обязательно, тк это уже есть в docker-compose.yml
+            python manage.py collectstatic --noinput  # можно добавить ключ -с # есть в docker-compose
+          
+            # Копируем статику в место для nginx # проверить, не обязательно а также имена папок
+            sudo mkdir -p /usr/share/nginx/html/static
+            sudo cp -r staticfiles/* /usr/share/nginx/html/static/ 2>/dev/null || true
+            sudo chown -R ${{ secrets.SSH_USER }}:${{ secrets.SSH_USER }} /usr/share/nginx/html/static
+          
+            # Перезапускаем контейнеры
+            docker-compose down
+            docker-compose up -d --build
+            #sudo systemctl restart myapp.service
+          EOF

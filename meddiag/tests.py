@@ -8,8 +8,8 @@ from django.views.generic import TemplateView
 from drf_yasg.openapi import Contact
 
 from meddiag.mixins import CompanyInfoMixin
-from meddiag.models import AboutCompany, Contacts, Direction, Services
-from meddiag.views import IndexListView, ServicesListView
+from meddiag.models import AboutCompany, Contacts, Direction, Services, Doctors
+from meddiag.views import IndexListView, ServicesListView, ServiceDetailView, DoctorsListView
 
 
 class TestView(CompanyInfoMixin, TemplateView):
@@ -163,3 +163,112 @@ class ServicesListViewTest(TestCase):
         response = self.client.get(reverse('meddiag:services_list'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'services_list.html')
+
+
+class ServiceDetailViewTest(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.direction = Direction.objects.create(
+            title="МРТ",
+            name="МРТ",
+        )
+        self.service = Services.objects.create(
+            title="МРТ",
+            name="МРТ",
+            direction=self.direction,
+        )
+        self.doctor = Doctors.objects.create(
+            last_name="Иванов",
+            first_name="Иван",
+            middle_name="Иванович",
+            specialization="Кардиолог",
+            direction=self.direction,
+        )
+        self.service.doctors.add(self.doctor)
+
+    def test_service_detail_view(self):
+        response = self.client.get(reverse('meddiag:service_detail', kwargs={"pk": self.service.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'service_detail.html')
+        self.assertIn('service', response.context)
+        self.assertEqual(response.context['service'], self.service)
+
+    def test_service_detail_view_with_doctor(self):
+        response = self.client.get(reverse('meddiag:service_detail', kwargs={"pk": self.service.pk})+
+                                   f'?doctor_id={self.doctor.pk}')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'service_detail.html')
+        self.assertIn('doctors', response.context)
+        self.assertEqual(response.context['doctors'][0], self.doctor)
+
+    def test_service_detail_view_no_service(self):
+        response = self.client.get(reverse('meddiag:service_detail', kwargs={"pk": 666}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_service_detail_view_context(self):
+        # Проверка наличия всех необходимых данных в контексте
+        response = self.client.get(
+            reverse('meddiag:service_detail', kwargs={'pk': self.service.pk})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('service', response.context)
+        self.assertIn('doctors', response.context)
+        self.assertIn('from_doctor_page', response.context)
+        self.assertIn('about_company', response.context)
+        self.assertIn('contacts', response.context)
+
+
+class DoctorsListViewTest(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.direction = Direction.objects.create(
+            title="Кардиология",
+            name="Кардиология",
+        )
+        self.doctor = Doctors.objects.create(
+            last_name="Иванов",
+            first_name="Иван",
+            middle_name="Иванович",
+            specialization="Кардиолог",
+            direction=self.direction,
+        )
+
+    def test_doctors_list_view(self):
+        request = self.factory.get('/')
+        request.user = AnonymousUser()
+        view = DoctorsListView()
+        view.request = request
+        view.kwargs = {"pk": 0}
+        view.object_list = view.get_queryset()
+
+        context = view.get_context_data()
+
+        self.assertIn('doctors_list', context)
+        self.assertEqual(len(context['doctors_list']),1)
+        self.assertEqual(context['doctors_list'][0], self.doctor)
+
+    def test_doctors_list_view_with_second_doctor(self):
+        Doctors.objects.create(
+            last_name="Петров",
+            first_name="Петр",
+            middle_name="Петрович",
+            specialization="Кардиолог",
+            direction=self.direction,
+        )
+
+        request = self.factory.get('/')
+        request.user = AnonymousUser()
+        view = DoctorsListView()
+        view.request = request
+        view.kwargs = {"pk": 0}
+        view.object_list = view.get_queryset()
+
+        context = view.get_context_data()
+
+        self.assertEqual(len(context['doctors_list']), 2)
+
+    def test_services_list_view_code_status(self):
+        response = self.client.get(reverse('meddiag:doctors_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'doctors_list.html')
+
