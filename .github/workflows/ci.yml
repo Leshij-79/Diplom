@@ -1,6 +1,6 @@
 name: Django CI/CD Pipeline
 
-on:   # [push, pull_request]
+on:
   push:
     branches:
       - Feature/Diplom
@@ -9,7 +9,6 @@ on:   # [push, pull_request]
 jobs:
   deploy:
     runs-on: ubuntu-latest
-#    needs: test
 
     steps:
       - name: Set up SSH
@@ -25,8 +24,8 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Загружаем всю историю
-          ref: Feature/Diplom       # Явно указываем ветку
+          fetch-depth: 0
+          ref: Feature/Diplom
 
       - name: Create .env file locally
         run: |
@@ -44,8 +43,20 @@ jobs:
           REDIS_HOST=${{ secrets.REDIS_HOST }}
           ENVEOF
 
-      - name: Copy project files to server
+      - name: Build Docker images locally
         run: |
+          docker-compose build
+
+      - name: Save Docker images
+        run: |
+          docker save diplom-web -o diplom-web.tar
+          docker save diplom-celery -o diplom-celery.tar
+          docker save diplom-celery-beat -o diplom-celery-beat.tar
+          docker save nginx:alpine -o nginx-alpine.tar
+
+      - name: Copy files to server
+        run: |
+          # Копируем код (без .env, он уже есть)
           rsync -avzu --rsync-path="sudo rsync" \
           --delete \
           --exclude '__pycache__' \
@@ -55,17 +66,27 @@ jobs:
           --exclude='.github' \
           --exclude='media' \
           --exclude='staticfiles' \
+          --exclude='*.tar' \
           --chown=${{ secrets.SSH_USER }}:${{ secrets.SSH_USER }} \
           ./ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
+
+          # Копируем Docker образы
+          scp -o StrictHostKeyChecking=no *.tar ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}/
 
       - name: Deploy application
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
             cd ${{ secrets.DEPLOY_DIR }}
-
-                    
-            # Перезапускаем контейнеры
-            docker-compose down
-            docker-compose up -d --build
-            #sudo systemctl restart myapp.service
+            
+            # Загружаем образы
+            docker load -i diplom-web.tar
+            docker load -i diplom-celery.tar
+            docker load -i diplom-celery-beat.tar
+            docker load -i nginx-alpine.tar
+            
+            # Удаляем tar файлы
+            rm -f *.tar
+            
+            # Запускаем контейнеры
+            docker-compose up -d
           EOF
