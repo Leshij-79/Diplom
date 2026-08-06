@@ -225,6 +225,7 @@ jobs:
           scp -o StrictHostKeyChecking=no *.tar ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}/
 
       - name: Deploy application
+        timeout-minutes: 30
         run: |
           ssh -o StrictHostKeyChecking=no \
             -o ServerAliveInterval=60 \
