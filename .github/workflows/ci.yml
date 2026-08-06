@@ -45,7 +45,7 @@ jobs:
 
       - name: Build Docker images locally
         run: |
-          docker-compose build
+          docker compose build
 
       - name: Save Docker images
         run: |
