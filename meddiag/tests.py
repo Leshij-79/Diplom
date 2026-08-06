@@ -1,15 +1,12 @@
-from urllib import response
-
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase, RequestFactory
 from django.urls import reverse
 
 from django.views.generic import TemplateView
-from drf_yasg.openapi import Contact
 
 from meddiag.mixins import CompanyInfoMixin
 from meddiag.models import AboutCompany, Contacts, Direction, Services, Doctors
-from meddiag.views import IndexListView, ServicesListView, ServiceDetailView, DoctorsListView
+from meddiag.views import IndexListView, ServicesListView, DoctorsListView
 
 
 class TestView(CompanyInfoMixin, TemplateView):
@@ -89,7 +86,7 @@ class IndexListViewTest(TestCase):
         context = view.get_context_data()
 
         self.assertIn('direction_list', context)
-        self.assertEqual(len(context['direction_list']),1)
+        self.assertEqual(len(context['direction_list']), 1)
         self.assertEqual(context['direction_list'][0], self.direction)
 
     def test_index_view_with_second_direction(self):
@@ -138,7 +135,7 @@ class ServicesListViewTest(TestCase):
         context = view.get_context_data()
 
         self.assertIn('services_list', context)
-        self.assertEqual(len(context['services_list']),1)
+        self.assertEqual(len(context['services_list']), 1,)
         self.assertEqual(context['services_list'][0], self.service)
 
     def test_services_list_view_with_second_service(self):
@@ -194,8 +191,8 @@ class ServiceDetailViewTest(TestCase):
         self.assertEqual(response.context['service'], self.service)
 
     def test_service_detail_view_with_doctor(self):
-        response = self.client.get(reverse('meddiag:service_detail', kwargs={"pk": self.service.pk})+
-                                   f'?doctor_id={self.doctor.pk}')
+        response = self.client.get(reverse('meddiag:service_detail', kwargs={"pk": self.service.pk})
+                                   + f'?doctor_id={self.doctor.pk}')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'service_detail.html')
         self.assertIn('doctors', response.context)
@@ -244,7 +241,7 @@ class DoctorsListViewTest(TestCase):
         context = view.get_context_data()
 
         self.assertIn('doctors_list', context)
-        self.assertEqual(len(context['doctors_list']),1)
+        self.assertEqual(len(context['doctors_list']), 1)
         self.assertEqual(context['doctors_list'][0], self.doctor)
 
     def test_doctors_list_view_with_second_doctor(self):
@@ -271,4 +268,3 @@ class DoctorsListViewTest(TestCase):
         response = self.client.get(reverse('meddiag:doctors_list'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'doctors_list.html')
-
