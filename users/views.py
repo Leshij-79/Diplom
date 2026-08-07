@@ -9,6 +9,7 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView
 
 from config.settings import EMAIL_HOST_USER
+from meddiag.mixins import CompanyInfoMixin
 from users.forms import (
     CustomAuthenticationForm,
     CustomUserCreationForm,
@@ -21,7 +22,7 @@ def UserLogoutView(request):
     return redirect("meddiag:index")
 
 
-class UserLoginView(LoginView):
+class UserLoginView(CompanyInfoMixin, LoginView):
     form_class = CustomAuthenticationForm
     template_name = "login.html"
     success_url = reverse_lazy("meddiag:index")
@@ -56,7 +57,7 @@ def email_verification(request, token):
     return redirect(reverse("users:login"))
 
 
-class RegisterView(FormView):
+class RegisterView(CompanyInfoMixin, FormView):
     model = CustomUser
     template_name = "register.html"
     form_class = CustomUserCreationForm

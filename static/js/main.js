@@ -57,7 +57,7 @@ function openAppointmentForm() {
 }
 
 function openLoginForm() {
-    window.location.href = '/login';
+    window.location.href = 'users/login';
 }
 
 // Имитация авторизации (для демонстрации)
