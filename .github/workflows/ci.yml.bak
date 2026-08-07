@@ -194,6 +194,17 @@ jobs:
           REDIS_HOST=${{ secrets.REDIS_HOST }}
           ENVEOF
 
+      - name: Build Docker images locally
+        run: |
+          docker compose build
+
+      - name: Save Docker images
+        run: |
+          docker save diplom-web -o diplom-web.tar
+          docker save diplom-celery -o diplom-celery.tar
+          docker save diplom-celery-beat -o diplom-celery-beat.tar
+          docker save nginx:alpine -o nginx-alpine.tar
+
       - name: Copy files to server
         run: |
           # Копируем код (без .env, он уже есть)
@@ -222,15 +233,14 @@ jobs:
             ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
             cd ${{ secrets.DEPLOY_DIR }}
             
-            export DJANGO_SETTINGS_MODULE=config.settings
+            # Загружаем образы
+            docker load -i diplom-web.tar
+            docker load -i diplom-celery.tar
+            docker load -i diplom-celery-beat.tar
+            docker load -i nginx-alpine.tar
             
-            mkdir -p staticfiles
-            cp -r staticfiles/* ${{ secrets.DEPLOY_DIR }}/staticfiles/ 2>/dev/null || true
-          
-            # Копируем статику в место для nginx # проверить, не обязательно а также имена папок
-            sudo mkdir -p /usr/share/nginx/html/static
-            sudo cp -r staticfiles/* /usr/share/nginx/html/static/ 2>/dev/null || true
-            sudo chown -R ${{ secrets.SSH_USER }}:${{ secrets.SSH_USER }} /usr/share/nginx/html/static
+            # Удаляем tar файлы
+            rm -f *.tar
             
             # Запускаем контейнеры
             docker compose down
