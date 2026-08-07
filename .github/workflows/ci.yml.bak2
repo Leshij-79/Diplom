@@ -192,23 +192,18 @@ jobs:
           CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}
           CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}
           REDIS_HOST=${{ secrets.REDIS_HOST }}
-          DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
           ENVEOF
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push Docker images
+      - name: Build Docker images locally
         run: |
-          # Собираем основной образ для Django + Celery
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/diplom-app:latest .
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/diplom-nginx:latest -f Dockerfile.nginx .
-          
-          docker push ${{ secrets.DOCKER_USERNAME }}/diplom-app:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/diplom-nginx:lasted
+          docker compose build
+
+      - name: Save Docker images
+        run: |
+          docker save diplom-web -o diplom-web.tar
+          docker save diplom-celery -o diplom-celery.tar
+          docker save diplom-celery-beat -o diplom-celery-beat.tar
+          docker save nginx:alpine -o nginx-alpine.tar
 
       - name: Copy files to server
         run: |
@@ -226,16 +221,28 @@ jobs:
           --chown=${{ secrets.SSH_USER }}:${{ secrets.SSH_USER }} \
           ./ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
 
+          # Копируем Docker образы
+          scp -o StrictHostKeyChecking=no *.tar ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}/
+
       - name: Deploy application
         timeout-minutes: 30
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no \
+            -o ServerAliveInterval=60 \
+            -o ServerAliveCountMax=3 \
+            ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
             cd ${{ secrets.DEPLOY_DIR }}
             
-            # Тянем свежие образы с Docker Hub
-            docker compose pull
+            # Загружаем образы
+            docker load -i diplom-web.tar
+            docker load -i diplom-celery.tar
+            docker load -i diplom-celery-beat.tar
+            docker load -i nginx-alpine.tar
+            
+            # Удаляем tar файлы
+            rm -f *.tar
             
             # Запускаем контейнеры
             docker compose down
-            docker compose up -d
+            docker compose up -d --build
           EOF
