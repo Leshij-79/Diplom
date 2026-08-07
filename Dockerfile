@@ -14,7 +14,6 @@ RUN poetry config virtualenvs.create false && \
     poetry config repositories.pypi https://pypi.tuna.tsinghua.edu.cn/simple/ && \
     poetry install --no-interaction --no-ansi --no-root --only main --verbose
 
-
 COPY . .
 
 EXPOSE 8000
