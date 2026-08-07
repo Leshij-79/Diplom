@@ -238,4 +238,5 @@ jobs:
             # Запускаем контейнеры
             docker compose down
             docker compose up -d
+            docker system prune -a -f
           EOF
