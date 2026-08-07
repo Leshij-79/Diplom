@@ -80,7 +80,7 @@ services:
     restart: unless-stopped
 
   nginx:
-    image: ${DOCKER_USERNAME}/diplom-nginx:lasted
+    image: ${DOCKER_USERNAME}/diplom-nginx:latset
     ports:
       - "80:80"
     volumes:
