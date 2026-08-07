@@ -2,7 +2,6 @@ services:
   web:
     image: ${DOCKER_USERNAME}/diplom-app:latest
     command: bash -c "
-      rm -rf /code/static/* &&
       python manage.py collectstatic --noinput && 
       python manage.py migrate && 
       python manage.py runserver 0.0.0.0:8000"
@@ -13,7 +12,6 @@ services:
       - DB_HOST=db
     volumes:
       - .:/code
-      - ./static:/code/static
       - static_volume:/code/static
     depends_on:
       db:

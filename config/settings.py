@@ -1,5 +1,4 @@
 import os
-import time
 from datetime import timedelta
 from pathlib import Path
 
@@ -104,9 +103,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
-
-STATIC_VERSION = time.strftime("%Y%m%d%H%M%S")
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
 AUTH_USER_MODEL = "users.CustomUser"
 
