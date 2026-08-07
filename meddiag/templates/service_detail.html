@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}{{ service.name }} - {{ about_company.full_name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/services.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="section service-detail-section">
+    <div class="service-detail-container">
+        <!-- Хлебные крошки -->
+        <div class="breadcrumbs">
+            <a href="{% url 'meddiag:index' %}">Главная</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="{% url 'meddiag:services_list' %}">Услуги</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>{{ service.name }}</span>
+        </div>
+
+        <!-- Заголовок услуги -->
+        <div class="service-detail-header">
+            <div class="service-detail-icon">
+                <i class="fas fa-stethoscope"></i>
+            </div>
+            <div class="service-detail-title">
+                <h2>{{ service.name }}</h2>
+                <p class="service-direction-label">
+                    <i class="fas fa-tag"></i> {{ service.direction.title }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Основная информация -->
+        <div class="service-detail-content">
+            <div class="service-detail-info">
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-ruble-sign"></i> Стоимость:</span>
+                    <span class="info-value">{{ service.price }} ₽</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-clock"></i> Длительность:</span>
+                    <span class="info-value">{{ service.duration_execution }} минут</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-tag"></i> Направление:</span>
+                    <span class="info-value">{{ service.direction.name }}</span>
+                </div>
+            </div>
+
+            <!-- Описание услуги -->
+            <div class="service-detail-description">
+                <h3>Описание услуги</h3>
+                <p>{{ service.description|linebreaks }}</p>
+            </div>
+
+            <!-- Врачи, оказывающие услугу -->
+            <div class="service-doctors">
+                <h3>
+                    <i class="fas fa-user-md"></i>
+                    {% if from_doctor_page %}
+                        Врач, оказывающий услугу
+                    {% else %}
+                        Врачи, оказывающие услугу
+                    {% endif %}
+                </h3>
+
+                {% if doctors %}
+                    <div class="doctors-grid">
+                        {% for doctor in doctors %}
+                            <div class="doctor-card">
+                                <div class="doctor-avatar">
+                                    {% if doctor.foto and doctor.foto.url %}
+                                        <img src="{{ doctor.foto.url }}"
+                                             alt="{{ doctor.last_name }}"
+                                             style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%;">
+                                    {% else %}
+                                        <i class="fas fa-user-circle" style="font-size: 60px; color: #ccc;"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="doctor-info">
+                                    <h4>
+                                        {% if from_doctor_page %}
+                                            {{ doctor.last_name }} {{ doctor.first_name }} {{ doctor.middle_name }}
+                                        {% else %}
+                                            <a href="{% url 'meddiag:doctor_detail' doctor.pk %}?next={{ request.path }}&service_id={{ service.pk }}"
+                                               style="text-decoration: none; color: #2c3e50; transition: color 0.3s ease;"
+                                               onmouseover="this.style.color='#2e86c1';"
+                                               onmouseout="this.style.color='#2c3e50';">
+                                                {{ doctor.last_name }} {{ doctor.first_name }} {{ doctor.middle_name }}
+                                            </a>
+                                        {% endif %}
+                                    </h4>
+                                    <p class="doctor-specialization">
+                                        <i class="fas fa-stethoscope"></i> {{ doctor.specialization }}
+                                    </p>
+                                    <p class="doctor-experience">
+                                        <i class="fas fa-clock"></i> Стаж {{ doctor.experience }} лет
+                                    </p>
+                                    <p class="doctor-category">
+                                        <i class="fas fa-certificate"></i>
+                                        {% if doctor.category == 'highest' %}Высшая категория
+                                        {% elif doctor.category == 'first' %}Первая категория
+                                        {% elif doctor.category == 'second' %}Вторая категория
+                                        {% else %}Без категории
+                                        {% endif %}
+                                    </p>
+                                    {% if not from_doctor_page %}
+                                        <a href="{% url 'meddiag:doctor_detail' doctor.pk %}?next={{ request.path }}&service_id={{ service.pk }}"
+                                           class="btn-doctor-detail"
+                                           style="display: inline-block; margin-top: 10px; padding: 6px 16px;
+                                                  background: #3498db; color: #fff; border-radius: 20px;
+                                                  text-decoration: none; font-size: 0.85rem; transition: background 0.3s ease;"
+                                           onmouseover="this.style.background='#2980b9';"
+                                           onmouseout="this.style.background='#3498db';">
+                                            Подробнее о враче
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if not from_doctor_page %}
+                        <h3>
+                            Вы можете записаться выбрав врача
+                        </h3>
+                    {% endif %}
+                {% else %}
+                    <div class="empty-doctors">
+                        <i class="fas fa-user-md"></i>
+                        <p>Врачи, оказывающие данную услугу, пока не назначены</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Дополнительная информация -->
+            <div class="service-detail-extra">
+                <div class="extra-block">
+                    <i class="fas fa-user-md"></i>
+                    <div>
+                        <h4>Квалифицированные специалисты</h4>
+                        <p>Наши врачи имеют многолетний опыт работы в данной области</p>
+                    </div>
+                </div>
+                <div class="extra-block">
+                    <i class="fas fa-microscope"></i>
+                    <div>
+                        <h4>Современное оборудование</h4>
+                        <p>Используем новейшее диагностическое оборудование</p>
+                    </div>
+                </div>
+                <div class="extra-block">
+                    <i class="fas fa-shield-alt"></i>
+                    <div>
+                        <h4>Безопасность и комфорт</h4>
+                        <p>Соблюдаем все стандарты безопасности и создаем комфортные условия</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопки действий -->
+            <div class="service-detail-actions">
+                {% if user.is_authenticated %}
+                    {% if from_doctor_page %}
+                        <a href="{% url 'meddiag:appointment_create' %}?service={{ service.id }}&doctor={{ doctor_id }}" class="btn-appointment">
+                            <i class="fas fa-calendar-plus"></i> Записаться
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn-appointment">
+                        <i class="fas fa-calendar-plus"></i> Войти
+                    </a>
+                {% endif %}
+                <button onclick="history.back()" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Вернуться
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

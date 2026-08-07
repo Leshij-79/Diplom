@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Врачи - {{ about_company.full_name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/doctors.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="section doctors-section">
+    <div class="doctors-header">
+        <h2>Наши врачи</h2>
+        <p>Выберите направление, чтобы ознакомиться со специалистами</p>
+    </div>
+
+    <!-- Фильтр по направлениям -->
+    <div class="doctors-filters">
+        <a href="{% url 'meddiag:doctors_list' %}" 
+           class="filter-tab {% if not current_direction_id %}active{% endif %}">
+            Все врачи
+        </a>
+        {% for direction in directions %}
+        <a href="{% url 'meddiag:doctors_list_direction' direction.pk %}" 
+           class="filter-tab {% if current_direction_id|stringformat:'s' == direction.pk|stringformat:'s' %}active{% endif %}">
+            {{ direction.title }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Список врачей -->
+    <div class="doctors-grid">
+        {% for doctor in doctors_list %}
+        <div class="doctor-card">
+            <div class="doctor-card-image">
+                {% if doctor.foto %}
+                <img src="{{ doctor.foto.url }}" alt="{{ doctor.last_name }} {{ doctor.first_name }}">
+                {% else %}
+                <div class="doctor-card-avatar">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                {% endif %}
+            </div>
+            <div class="doctor-card-body">
+                <h3>
+                    <a href="{% url 'meddiag:doctor_detail' doctor.pk %}" class="doctor-name-link">
+                        {{ doctor.last_name }} {{ doctor.first_name }} {{ doctor.middle_name }}
+                    </a>
+                </h3>
+                <p class="doctor-specialization">
+                    <i class="fas fa-stethoscope"></i> {{ doctor.specialization }}
+                </p>
+                <div class="doctor-card-meta">
+                    <span class="doctor-experience">
+                        <i class="fas fa-clock"></i> Стаж {{ doctor.experience }} лет
+                    </span>
+                    <span class="doctor-category">
+                        <i class="fas fa-certificate"></i>
+                        {% if doctor.category == 'highest' %}Высшая категория
+                        {% elif doctor.category == 'first' %}Первая категория
+                        {% elif doctor.category == 'second' %}Вторая категория
+                        {% else %}Без категории
+                        {% endif %}
+                    </span>
+                    <span class="doctor-direction">
+                        <i class="fas fa-tag"></i> {{ doctor.direction.title }}
+                    </span>
+                </div>
+                <a href="{% url 'meddiag:doctor_detail' doctor.pk %}" class="btn-doctor-detail">
+                    Подробнее <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-doctors">
+            <i class="fas fa-user-md"></i>
+            <p>В данной категории пока нет врачей</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Анимация появления карточек
+    const cards = document.querySelectorAll('.doctor-card');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }, index * 100);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    cards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        observer.observe(card);
+    });
+});
+</script>
+{% endblock %}

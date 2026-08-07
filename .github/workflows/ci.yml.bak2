@@ -1,0 +1,248 @@
+name: Django CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - Feature/Diplom
+      - Develop
+
+jobs:
+  lint:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Configure Poetry
+        run: |
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project true
+
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+            venv-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: |
+          poetry install --no-interaction --no-root
+
+      - name: Run linters
+        run: |
+          poetry run flake8 meddiag
+          poetry run flake8 users  
+
+  test:
+    runs-on: ubuntu-22.04
+    needs: lint
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: meddiag
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+          cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpq-dev file postgresql-client
+
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}-v2
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Configure Poetry
+        run: |
+          poetry config virtualenvs.in-project true
+
+      - name: Install dependencies
+        run: |
+          poetry install --no-interaction --no-root
+
+      - name: Create static directory
+        run: |
+          mkdir -p static
+
+      - name: Set environment variables directly
+        run: |
+          echo "SECRET_KEY=django-insecure-ci-test-key" >> $GITHUB_ENV
+          echo "DB_NAME=meddiag" >> $GITHUB_ENV
+          echo "DB_USER=postgres" >> $GITHUB_ENV
+          echo "DB_PASSWORD=postgres" >> $GITHUB_ENV
+          echo "DB_HOST=127.0.0.1" >> $GITHUB_ENV
+          echo "DB_PORT=5432" >> $GITHUB_ENV
+          echo "EMAIL_HOST_USER=test@example.com" >> $GITHUB_ENV
+          echo "EMAIL_HOST_PASSWORD=test_password" >> $GITHUB_ENV
+          echo "CELERY_BROKER_URL=redis://127.0.0.1:6379/0" >> $GITHUB_ENV
+          echo "CELERY_RESULT_BACKEND=redis://127.0.0.1:6379/0" >> $GITHUB_ENV
+          echo "REDIS_HOST=127.0.0.1" >> $GITHUB_ENV
+          echo "GITHUB_ACTIONS=true" >> $GITHUB_ENV
+
+      - name: Set Python path
+        run: |
+          echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
+
+      - name: Wait for Postgres to be ready
+        run: |
+          echo "Waiting for Postgres to be ready..."
+          for i in {1..30}; do
+            if pg_isready -h 127.0.0.1 -p 5432 -U postgres; then
+              echo "Postgres is ready!"
+              break
+            fi
+            echo "Waiting for Postgres... ($i/30)"
+            sleep 2
+          done
+
+      - name: Run migrations
+        run: |
+          export PYTHONPATH=$PWD
+          poetry run python manage.py migrate
+
+      - name: Run tests
+        run: |
+          export PYTHONPATH=$PWD
+          poetry run python manage.py test
+
+
+  deploy:
+    runs-on: ubuntu-22.04
+    needs: test
+
+    steps:
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: Feature/Diplom
+
+      - name: Create .env file locally
+        run: |
+          cat > .env << 'ENVEOF'
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_HOST=${{ secrets.DB_HOST }}
+          DB_PORT=${{ secrets.DB_PORT }}
+          EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}
+          EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
+          CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}
+          CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}
+          REDIS_HOST=${{ secrets.REDIS_HOST }}
+          ENVEOF
+
+      - name: Build Docker images locally
+        run: |
+          docker compose build
+
+      - name: Save Docker images
+        run: |
+          docker save diplom-web -o diplom-web.tar
+          docker save diplom-celery -o diplom-celery.tar
+          docker save diplom-celery-beat -o diplom-celery-beat.tar
+          docker save nginx:alpine -o nginx-alpine.tar
+
+      - name: Copy files to server
+        run: |
+          # Копируем код (без .env, он уже есть)
+          rsync -avzu --rsync-path="sudo rsync" \
+          --delete \
+          --exclude '__pycache__' \
+          --exclude='venv' \
+          --exclude='*.pyc' \
+          --exclude='.git' \
+          --exclude='.github' \
+          --exclude='media' \
+          --exclude='staticfiles' \
+          --exclude='*.tar' \
+          --chown=${{ secrets.SSH_USER }}:${{ secrets.SSH_USER }} \
+          ./ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
+
+          # Копируем Docker образы
+          scp -o StrictHostKeyChecking=no *.tar ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}/
+
+      - name: Deploy application
+        timeout-minutes: 30
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+            -o ServerAliveInterval=60 \
+            -o ServerAliveCountMax=3 \
+            ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            cd ${{ secrets.DEPLOY_DIR }}
+            
+            # Загружаем образы
+            docker load -i diplom-web.tar
+            docker load -i diplom-celery.tar
+            docker load -i diplom-celery-beat.tar
+            docker load -i nginx-alpine.tar
+            
+            # Удаляем tar файлы
+            rm -f *.tar
+            
+            # Запускаем контейнеры
+            docker compose down
+            docker compose up -d --build
+          EOF

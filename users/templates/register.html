@@ -1,25 +1,255 @@
-
 {% extends 'base.html' %}
-{% block title %}Регистрация пользователя{% endblock %}
+
+{% load static %}
+
+{% block title %}Регистрация - Медицинская Диагностика{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
 
 {% block content %}
-
-    <div class="container">
-        <div class="col-1">
+<section class="section auth-section">
+    <div class="auth-container">
+        <div class="auth-header">
+            <i class="fas fa-user-plus auth-icon"></i>
+            <h2>Регистрация</h2>
+            <p>Создайте аккаунт для доступа к личному кабинету</p>
         </div>
-        <div class="col-12">
-            <div class="row text-center">
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
-                    <a role="button" class="btn btn-secondary" href="{% url 'sending_mail:mailing_list' %}">Назад</a>
-                </form>
+
+        <!-- Сообщения от Django -->
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %}">
+                <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% else %}info-circle{% endif %}"></i>
+                {{ message }}
             </div>
-        </div>
-        <div class="col-1">
-        </div>
-        {% include 'footer.html' %}
-    </div>
+            {% endfor %}
+        {% endif %}
 
+        <form class="auth-form" method="POST" action="{% url 'users:register' %}" id="registerForm" autocomplete="off">
+            {% csrf_token %}
+
+            <!-- Фамилия -->
+            <div class="form-group">
+                <label for="id_last_name">
+                    <i class="fas fa-user"></i> Фамилия
+                </label>
+                <input type="text" id="id_last_name" name="last_name"
+                       placeholder="Введите фамилию"
+                       value="{{ form.last_name.value|default:'' }}"
+                       autocomplete="family-name" required>
+                {% if form.last_name.errors %}
+                <div class="field-error">{{ form.last_name.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Имя -->
+            <div class="form-group">
+                <label for="id_first_name">
+                    <i class="fas fa-user"></i> Имя
+                </label>
+                <input type="text" id="id_first_name" name="first_name"
+                       placeholder="Введите имя"
+                       value="{{ form.first_name.value|default:'' }}"
+                       autocomplete="given-name" required>
+                {% if form.first_name.errors %}
+                <div class="field-error">{{ form.first_name.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Отчество -->
+            <div class="form-group">
+                <label for="id_middle_name">
+                    <i class="fas fa-user"></i> Отчество
+                </label>
+                <input type="text" id="id_middle_name" name="middle_name"
+                       placeholder="Введите отчество"
+                       value="{{ form.middle_name.value|default:'' }}"
+                       autocomplete="additional-name">
+                {% if form.middle_name.errors %}
+                <div class="field-error">{{ form.middle_name.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Логин (username) -->
+            <div class="form-group">
+                <label for="id_username">
+                    <i class="fas fa-user-tag"></i> Логин
+                </label>
+                <input type="text" id="id_username" name="username"
+                       placeholder="Придумайте логин"
+                       value="{{ form.username.value|default:'' }}"
+                       autocomplete="username" required>
+                {% if form.username.errors %}
+                <div class="field-error">{{ form.username.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label for="id_email">
+                    <i class="fas fa-envelope"></i> Email
+                </label>
+                <input type="email" id="id_email" name="email"
+                       placeholder="example@mail.ru"
+                       value="{{ form.email.value|default:'' }}"
+                       autocomplete="email" required>
+                {% if form.email.errors %}
+                <div class="field-error">{{ form.email.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Телефон -->
+            <div class="form-group">
+                <label for="id_phone_number">
+                    <i class="fas fa-phone"></i> Номер телефона
+                </label>
+                <input type="tel" id="id_phone_number" name="phone_number"
+                       placeholder="+7 (999) 123-45-67"
+                       value="{{ form.phone_number.value|default:'' }}"
+                       autocomplete="tel">
+                <div class="password-hint">Формат: +7 (999) 123-45-67</div>
+                {% if form.phone_number.errors %}
+                <div class="field-error">{{ form.phone_number.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Пароль -->
+            <div class="form-group">
+                <label for="id_password1">
+                    <i class="fas fa-lock"></i> Пароль
+                </label>
+                <div class="password-wrapper">
+                    <input type="password" id="id_password1" name="password1"
+                           placeholder="Введите пароль"
+                           autocomplete="new-password" required>
+                    <button type="button" class="toggle-password" onclick="togglePassword('id_password1')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="password-hint">Пароль должен содержать минимум 8 символов</div>
+                {% if form.password1.errors %}
+                <div class="field-error">{{ form.password1.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Подтверждение пароля -->
+            <div class="form-group">
+                <label for="id_password2">
+                    <i class="fas fa-check-circle"></i> Подтверждение пароля
+                </label>
+                <div class="password-wrapper">
+                    <input type="password" id="id_password2" name="password2"
+                           placeholder="Повторите пароль"
+                           autocomplete="new-password" required>
+                    <button type="button" class="toggle-password" onclick="togglePassword('id_password2')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                {% if form.password2.errors %}
+                <div class="field-error">{{ form.password2.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Кнопка Зарегистрироваться -->
+            <button type="submit" class="btn-register">
+                <i class="fas fa-user-plus"></i> Зарегистрироваться
+            </button>
+
+            <!-- Разделитель -->
+            <div class="divider">
+                <span>или</span>
+            </div>
+
+            <!-- Кнопка Войти -->
+            <button type="button" class="btn-login" onclick="location.href='{% url 'users:login' %}'">
+                <i class="fas fa-sign-in-alt"></i> Уже есть аккаунт? Войти
+            </button>
+
+            <!-- Ошибки формы (общие) -->
+            {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</section>
+
+<script>
+// Показать/скрыть пароль
+function togglePassword(fieldId) {
+    const passwordInput = document.getElementById(fieldId);
+    const toggleBtn = passwordInput.parentElement.querySelector('.toggle-password i');
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleBtn.classList.remove('fa-eye');
+        toggleBtn.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleBtn.classList.remove('fa-eye-slash');
+        toggleBtn.classList.add('fa-eye');
+    }
+}
+
+// Валидация формы перед отправкой
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    const password1 = document.getElementById('id_password1').value;
+    const password2 = document.getElementById('id_password2').value;
+
+    // Удаляем старые сообщения об ошибках
+    const oldAlerts = this.querySelectorAll('.alert');
+    oldAlerts.forEach(el => el.remove());
+
+    let hasError = false;
+
+    // Проверка совпадения паролей
+    if (password1 !== password2) {
+        e.preventDefault();
+        hasError = true;
+
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-error';
+        alert.innerHTML = '<i class="fas fa-exclamation-circle"></i> Пароли не совпадают. Пожалуйста, проверьте введенные данные.';
+        const registerBtn = this.querySelector('.btn-register');
+        this.insertBefore(alert, registerBtn);
+    }
+
+    // Проверка длины пароля
+    if (password1.length < 8 && password1.length > 0) {
+        e.preventDefault();
+        hasError = true;
+
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-error';
+        alert.innerHTML = '<i class="fas fa-exclamation-circle"></i> Пароль должен содержать минимум 8 символов.';
+        const registerBtn = this.querySelector('.btn-register');
+        this.insertBefore(alert, registerBtn);
+    }
+
+    if (hasError) {
+        setTimeout(() => {
+            const alerts = this.querySelectorAll('.alert');
+            alerts.forEach(el => {
+                if (el.parentNode) {
+                    el.remove();
+                }
+            });
+        }, 5000);
+    }
+});
+
+// Отключаем автозаполнение для поля email (чтобы браузер не путал)
+document.addEventListener('DOMContentLoaded', function() {
+    const emailField = document.getElementById('id_email');
+    if (emailField) {
+        emailField.setAttribute('autocomplete', 'email');
+    }
+});
+</script>
 {% endblock %}

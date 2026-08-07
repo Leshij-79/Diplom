@@ -1,0 +1,515 @@
+/* ============================================
+   СТИЛИ ДЛЯ СТРАНИЦ ВРАЧЕЙ
+   ============================================ */
+
+/* ---------- Общие стили ---------- */
+.doctors-section {
+    padding: 1rem 0;
+}
+
+.doctors-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.doctors-header h2 {
+    color: #1a5276;
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.doctors-header p {
+    color: #7f8c8d;
+    font-size: 1.05rem;
+}
+
+/* ---------- Фильтры ---------- */
+.doctors-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+}
+
+.filter-tab {
+    padding: 10px 24px;
+    border: 2px solid #e0e6ed;
+    border-radius: 30px;
+    background: white;
+    color: #555;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.filter-tab:hover {
+    border-color: #2e86c1;
+    color: #2e86c1;
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+.filter-tab.active {
+    background: linear-gradient(135deg, #1a5276, #2e86c1);
+    color: white;
+    border-color: #2e86c1;
+    box-shadow: 0 4px 15px rgba(46, 134, 193, 0.3);
+}
+
+/* ---------- Сетка врачей ---------- */
+.doctors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+/* ---------- Карточка врача ---------- */
+.doctor-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    border: 1px solid #e0e6ed;
+}
+
+.doctor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+    border-color: #2e86c1;
+}
+
+.doctor-card-image {
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+    background: #f0f4f8;
+}
+
+.doctor-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.doctor-card-avatar {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1a5276, #2e86c1);
+    color: white;
+    font-size: 80px;
+}
+
+.doctor-card-body {
+    padding: 1.5rem;
+}
+
+.doctor-card-body h3 {
+    margin-bottom: 0.3rem;
+}
+
+.doctor-name-link {
+    color: #1a5276;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.doctor-name-link:hover {
+    color: #2e86c1;
+    text-decoration: underline;
+}
+
+.doctor-specialization {
+    color: #2e86c1;
+    font-weight: 500;
+    font-size: 0.95rem;
+    margin-bottom: 0.8rem;
+}
+
+.doctor-specialization i {
+    margin-right: 6px;
+}
+
+.doctor-card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+.doctor-card-meta span {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.doctor-card-meta i {
+    color: #2e86c1;
+    width: 20px;
+}
+
+.btn-doctor-detail {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #2e86c1;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+
+.btn-doctor-detail:hover {
+    color: #1a5276;
+    gap: 12px;
+}
+
+.btn-doctor-detail i {
+    transition: transform 0.3s;
+}
+
+.btn-doctor-detail:hover i {
+    transform: translateX(4px);
+}
+
+.empty-doctors {
+    text-align: center;
+    padding: 3rem;
+    color: #95a5a6;
+    grid-column: 1 / -1;
+}
+
+.empty-doctors i {
+    font-size: 48px;
+    margin-bottom: 1rem;
+    color: #bdc3c7;
+}
+
+/* ============================================
+   ДЕТАЛЬНАЯ СТРАНИЦА ВРАЧА
+   ============================================ */
+
+.doctor-detail-section {
+    padding: 1rem 0;
+}
+
+.doctor-detail-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* ---------- Хлебные крошки ---------- */
+.breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.breadcrumbs a {
+    color: #2e86c1;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.breadcrumbs a:hover {
+    color: #1a5276;
+    text-decoration: underline;
+}
+
+.breadcrumbs i {
+    font-size: 0.7rem;
+    color: #bdc3c7;
+}
+
+.breadcrumbs span {
+    color: #555;
+}
+
+/* ---------- Карточка врача (детальная) ---------- */
+.doctor-detail-card {
+    display: flex;
+    gap: 2rem;
+    padding: 2rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e0e6ed;
+    margin-bottom: 2rem;
+}
+
+.doctor-detail-image {
+    flex-shrink: 0;
+    width: 200px;
+    height: 200px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f0f4f8;
+}
+
+.doctor-detail-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.doctor-detail-avatar {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1a5276, #2e86c1);
+    color: white;
+    font-size: 80px;
+}
+
+.doctor-detail-info {
+    flex: 1;
+}
+
+.doctor-detail-info h2 {
+    color: #1a5276;
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+}
+
+.doctor-detail-specialization {
+    color: #2e86c1;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 1.2rem;
+}
+
+.doctor-detail-specialization i {
+    margin-right: 8px;
+}
+
+.doctor-detail-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    color: #555;
+}
+
+.meta-item i {
+    color: #2e86c1;
+    width: 24px;
+    font-size: 1.1rem;
+}
+
+.meta-item strong {
+    color: #1a5276;
+}
+
+/* ---------- Услуги врача ---------- */
+.doctor-services {
+    margin: 2rem 0;
+}
+
+.doctor-services h3 {
+    color: #1a5276;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.doctor-services h3 i {
+    color: #2e86c1;
+}
+
+.doctor-services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.doctor-service-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #e0e6ed;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.doctor-service-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    border-color: #2e86c1;
+    text-decoration: none;
+}
+
+.service-icon-small {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1a5276, #2e86c1);
+    border-radius: 10px;
+    color: white;
+    font-size: 20px;
+}
+
+.service-info-small {
+    flex: 1;
+}
+
+.service-info-small h4 {
+    color: #1a5276;
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+}
+
+.service-info-small p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #7f8c8d;
+}
+
+.service-info-small p i {
+    color: #2e86c1;
+    margin-right: 4px;
+}
+
+/* ---------- Кнопки действий ---------- */
+.doctor-detail-actions {
+    display: flex;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #e0e6ed;
+}
+
+.btn-appointment {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #1a5276, #2e86c1);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.btn-appointment:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(46, 134, 193, 0.35);
+    color: white;
+}
+
+.btn-appointment i {
+    font-size: 1.2rem;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 32px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.btn-back:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.35);
+    background: #c0392b;
+    color: white;
+}
+
+.btn-back i {
+    font-size: 1.1rem;
+}
+
+/* ---------- Адаптивность ---------- */
+@media (max-width: 768px) {
+    .doctor-detail-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .doctor-detail-image {
+        width: 150px;
+        height: 150px;
+    }
+
+    .doctor-detail-meta {
+        align-items: center;
+    }
+
+    .doctors-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .doctor-services-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .doctor-detail-actions {
+        flex-direction: column;
+    }
+
+    .btn-appointment,
+    .btn-back {
+        justify-content: center;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .doctors-filters {
+        gap: 0.5rem;
+    }
+
+    .filter-tab {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+
+    .doctor-card-image {
+        height: 180px;
+    }
+}

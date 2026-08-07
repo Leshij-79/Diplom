@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Сообщение отправлено - {{ about_company.full_name|default:"Медицинская Диагностика" }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/contact_form.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="section contact-form-section">
+    <div class="contact-form-container success-container">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h2>Сообщение успешно отправлено!</h2>
+        <p>Спасибо за обращение. Мы свяжемся с вами в ближайшее время.</p>
+
+        <div class="success-details">
+            <div class="detail-item">
+                <i class="fas fa-envelope"></i>
+                <span>Копия письма отправлена на ваш email</span>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-clock"></i>
+                <span>Мы отвечаем в течение 24 часов</span>
+            </div>
+        </div>
+
+        <div class="success-actions">
+            <a href="{% url 'meddiag:index' %}" class="btn-submit">
+                <i class="fas fa-home"></i> На главную
+            </a>
+            <a href="{% url 'meddiag:contact_form' %}" class="btn-back">
+                <i class="fas fa-pen"></i> Написать еще
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

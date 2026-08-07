@@ -9,10 +9,36 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = ["username", "first_name", "last_name"]
     EMAIL_FIELD = "email"
 
-    avatar = models.ImageField(upload_to="media/avatars", blank=True, null=True, verbose_name="Аватар")
-    phone_number = models.CharField(blank=True, null=True, max_length=15, verbose_name="Номер телефона")
-    country = models.CharField(blank=True, null=True, max_length=50, verbose_name="Страна")
-    token = models.CharField(max_length=150, verbose_name="Токен")
+    last_name = models.CharField(
+        max_length=150,
+        verbose_name="Фамилия",
+        help_text="Укажите фамилию",
+    )
+
+    first_name = models.CharField(
+        max_length=150,
+        verbose_name="Имя",
+        help_text="Укажите имя",
+    )
+
+    middle_name = models.CharField(
+        max_length=150,
+        default="",
+        verbose_name="Отчество",
+        help_text="Укажите отчество",
+    )
+
+    phone_number = models.CharField(
+        max_length=15,
+        blank=True,
+        null=True,
+        verbose_name="Номер телефона",
+    )
+
+    token = models.CharField(
+        max_length=150,
+        verbose_name="Токен",
+    )
 
     class Meta:
         verbose_name = "Пользователь"

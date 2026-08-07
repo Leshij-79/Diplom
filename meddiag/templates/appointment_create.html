@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Запись на прием - {{ about_company.full_name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/appointment.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="section appointment-section">
+    <div class="appointment-container">
+        <div class="appointment-header">
+            <i class="fas fa-calendar-plus appointment-icon"></i>
+            <h2>Запись на прием</h2>
+            <p>Заполните форму для записи к врачу</p>
+        </div>
+
+        <form class="appointment-form" method="POST">
+            {% csrf_token %}
+
+            <!-- Вывод сообщений -->
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}{{ message.tags }}{% endif %}">
+                    <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% else %}info-circle{% endif %}"></i>
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Услуга -->
+            <div class="form-group">
+                <label for="{{ form.services.id_for_label }}">
+                    <i class="fas fa-stethoscope"></i> Услуга <span class="required">*</span>
+                </label>
+                {{ form.services }}
+                {% if form.services.errors %}
+                    <div class="field-error">{{ form.services.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Врач -->
+            <div class="form-group">
+                <label for="{{ form.doctor.id_for_label }}">
+                    <i class="fas fa-user-md"></i> Врач <span class="required">*</span>
+                </label>
+                {{ form.doctor }}
+                {% if form.doctor.errors %}
+                    <div class="field-error">{{ form.doctor.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Дата и время -->
+            <div class="form-group">
+                <label for="{{ form.datetime.id_for_label }}">
+                    <i class="fas fa-calendar-clock"></i> Дата и время <span class="required">*</span>
+                </label>
+                {{ form.datetime }}
+                <div class="field-hint">Рабочее время: {{ contacts.hour_start }}:00 - {{ contacts.hour_end }}:00</div>
+                {% if form.datetime.errors %}
+                    <div class="field-error">{{ form.datetime.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Кнопки -->
+            <div class="appointment-actions">
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-check-circle"></i> Записаться
+                </button>
+                <button type="button" class="btn-cancel" onclick="history.back()">
+                    <i class="fas fa-times-circle"></i> Отмена
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const serviceSelect = document.getElementById('id_services');
+    const doctorSelect = document.getElementById('id_doctor');
+
+    // Данные о врачах по услугам
+    const doctorsByService = {{ doctor_for_service|safe }};
+
+    // ID предварительно выбранного врача (из GET-параметра)
+    const selectedDoctorId = "{{ request.GET.doctor|default:'' }}";
+    // ID предварительно выбранной услуги
+    const selectedServiceId = "{{ request.GET.service|default:'' }}";
+
+    function updateDoctors() {
+        const serviceId = serviceSelect.value;
+        const currentSelection = doctorSelect.value; // Сохраняем текущее значение
+
+        // Очищаем список
+        doctorSelect.innerHTML = '<option value="">Выберите врача</option>';
+
+        if (serviceId && doctorsByService[serviceId]) {
+            const doctors = doctorsByService[serviceId];
+
+            // Добавляем врачей
+            doctors.forEach(function(doctor) {
+                const option = document.createElement('option');
+                option.value = doctor.id;
+                option.textContent = doctor.last_name + ' ' + doctor.first_name +
+                                    ' ' + doctor.middle_name + ' (' + doctor.specialization + ')';
+                doctorSelect.appendChild(option);
+            });
+
+            // Логика автоматического выбора
+            if (doctors.length === 1) {
+                // Если только один врач
+                const singleDoctorId = doctors[0].id;
+
+                // Проверяем, совпадает ли с предварительно выбранным
+                if (selectedDoctorId && selectedDoctorId == singleDoctorId) {
+                    doctorSelect.value = singleDoctorId;
+                } else if (!selectedDoctorId) {
+                    // Если предварительно не выбран - выбираем единственного
+                    doctorSelect.value = singleDoctorId;
+                } else {
+                    // Если предварительно выбран другой врач (не из списка)
+                    // Показываем сообщение или оставляем пустым
+                    doctorSelect.value = '';
+                }
+            } else if (doctors.length > 1) {
+                // Если несколько врачей
+                // Проверяем, есть ли предварительно выбранный врач в списке
+                if (selectedDoctorId) {
+                    const doctorExists = doctors.some(d => d.id == selectedDoctorId);
+                    if (doctorExists) {
+                        doctorSelect.value = selectedDoctorId;
+                    } else {
+                        // Если предварительно выбранного врача нет в списке
+                        // оставляем пустым
+                        doctorSelect.value = '';
+                    }
+                } else {
+                    // Если предварительно не выбран - оставляем пустым
+                    doctorSelect.value = '';
+                }
+            }
+        } else {
+            // Если услуга не выбрана - очищаем список врачей
+            doctorSelect.innerHTML = '<option value="">Сначала выберите услугу</option>';
+        }
+    }
+
+    // Обновляем врачей при загрузке
+    updateDoctors();
+
+    // Обновляем врачей при изменении услуги
+    serviceSelect.addEventListener('change', updateDoctors);
+});
+</script>
+{% endblock %}
