@@ -27,14 +27,16 @@ class UserLoginView(LoginView):
     success_url = reverse_lazy("meddiag:index")
 
     def get_success_url(self):
-        next_url = self.request.POST.get("next") or self.request.GET.get("next")
+        next_url = self.request.POST.get("next")
 
         if next_url:
             return next_url
 
         referer = self.request.META.get("HTTP_REFERER")
         if referer:
-            return referer
+            login_url = reverse("users:login")
+            if login_url not in referer:
+                return referer
 
         return reverse_lazy("meddiag:index")
 
