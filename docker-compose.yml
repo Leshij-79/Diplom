@@ -13,6 +13,7 @@ services:
       - DB_HOST=db
     volumes:
       - .:/code
+      - ./static:/code/static
       - static_volume:/code/static
     depends_on:
       db:
