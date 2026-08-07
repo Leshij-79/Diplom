@@ -208,7 +208,7 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/diplom-nginx:latest -f Dockerfile.nginx .
           
           docker push ${{ secrets.DOCKER_USERNAME }}/diplom-app:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/diplom-nginx:lasted
+          docker push ${{ secrets.DOCKER_USERNAME }}/diplom-nginx:latest
 
       - name: Copy files to server
         run: |
