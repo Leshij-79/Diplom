@@ -210,9 +210,6 @@ jobs:
           --chown=${{ secrets.SSH_USER }}:${{ secrets.SSH_USER }} \
           ./ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
 
-          # Копируем Docker образы
-          scp -o StrictHostKeyChecking=no *.tar ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}/
-
       - name: Deploy application
         timeout-minutes: 30
         run: |
