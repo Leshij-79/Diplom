@@ -14,7 +14,7 @@ services:
       --timeout 120
       --graceful-timeout 30
       --access-logfile -
-      --error-logfile -"
+      --error-logfile - "
     env_file:
       - .env
     environment:
@@ -24,6 +24,11 @@ services:
     volumes:
       - .:/code
       - static_volume:/code/static
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     depends_on:
       db:
         condition: service_healthy
