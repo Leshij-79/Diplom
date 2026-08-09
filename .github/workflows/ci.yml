@@ -123,6 +123,8 @@ jobs:
           echo "DB_PASSWORD=postgres" >> $GITHUB_ENV
           echo "DB_HOST=127.0.0.1" >> $GITHUB_ENV
           echo "DB_PORT=5432" >> $GITHUB_ENV
+          echo "ALLOWED_HOSTS=["*"]" >> $GITHUB_ENV
+          echo "CSRF_TRUSTED_ORIGINS=["http://localhost","http://127.0.0.1"] >> $GITHUB_ENV
           echo "EMAIL_HOST_USER=test@example.com" >> $GITHUB_ENV
           echo "EMAIL_HOST_PASSWORD=test_password" >> $GITHUB_ENV
           echo "CELERY_BROKER_URL=redis://127.0.0.1:6379/0" >> $GITHUB_ENV
