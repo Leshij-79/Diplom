@@ -3,13 +3,24 @@ services:
     image: ${DOCKER_USERNAME}/diplom-app:latest
     command: bash -c "
       python manage.py collectstatic --noinput && 
-      python manage.py migrate && 
-      python manage.py runserver 0.0.0.0:8000"
+      python manage.py migrate &&
+      gunicorn config.wsgi:application
+      --bind 0.0.0.0:8000
+      --workers 4
+      --threads 2
+      --worker-class gthread
+      --max-requests 1000
+      --max-requests-jitter 100
+      --timeout 120
+      --graceful-timeout 30
+      --access-logfile -
+      --error-logfile -"
     env_file:
       - .env
     environment:
       - DEBUG=False
       - DB_HOST=db
+      - PYTHONUNBUFFERED=1
     volumes:
       - .:/code
       - static_volume:/code/static

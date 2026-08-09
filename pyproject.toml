@@ -39,6 +39,7 @@ django-celery-beat = "^2.9.0"
 djangorestframework-stubs = "^3.17.0"
 pillow = "^12.3.0"
 django-storages = "^1.14.6"
+gunicorn = "^26.0.0"
 
 
 [build-system]
