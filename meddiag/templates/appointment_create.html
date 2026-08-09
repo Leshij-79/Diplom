@@ -20,13 +20,15 @@
         <form class="appointment-form" method="POST">
             {% csrf_token %}
 
-            <!-- Вывод сообщений -->
+            <!-- Вывод сообщений ТОЛЬКО об ошибках -->
             {% if messages %}
                 {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}{{ message.tags }}{% endif %}">
-                    <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% else %}info-circle{% endif %}"></i>
-                    {{ message }}
-                </div>
+                    {% if 'error' in message.tags %}
+                        <div class="alert alert-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ message }}
+                        </div>
+                    {% endif %}
                 {% endfor %}
             {% endif %}
 
@@ -79,28 +81,28 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const serviceSelect = document.getElementById('id_services');
+    const serviceSelect = document.getElementById('id_service');
     const doctorSelect = document.getElementById('id_doctor');
 
-    // Данные о врачах по услугам
-    const doctorsByService = {{ doctor_for_service|safe }};
+    if (!serviceSelect || !doctorSelect) {
+        console.error('Не найдены поля формы!');
+        return;
+    }
 
-    // ID предварительно выбранного врача (из GET-параметра)
+    const doctorsByService = {{ doctor_for_service|safe }};
     const selectedDoctorId = "{{ request.GET.doctor|default:'' }}";
-    // ID предварительно выбранной услуги
-    const selectedServiceId = "{{ request.GET.service|default:'' }}";
 
     function updateDoctors() {
         const serviceId = serviceSelect.value;
-        const currentSelection = doctorSelect.value; // Сохраняем текущее значение
-
-        // Очищаем список
         doctorSelect.innerHTML = '<option value="">Выберите врача</option>';
 
-        if (serviceId && doctorsByService[serviceId]) {
-            const doctors = doctorsByService[serviceId];
+        if (!serviceId) {
+            doctorSelect.innerHTML = '<option value="">Сначала выберите услугу</option>';
+            return;
+        }
 
-            // Добавляем врачей
+        const doctors = doctorsByService[serviceId];
+        if (doctors && doctors.length > 0) {
             doctors.forEach(function(doctor) {
                 const option = document.createElement('option');
                 option.value = doctor.id;
@@ -109,50 +111,42 @@ document.addEventListener('DOMContentLoaded', function() {
                 doctorSelect.appendChild(option);
             });
 
-            // Логика автоматического выбора
-            if (doctors.length === 1) {
-                // Если только один врач
-                const singleDoctorId = doctors[0].id;
-
-                // Проверяем, совпадает ли с предварительно выбранным
-                if (selectedDoctorId && selectedDoctorId == singleDoctorId) {
-                    doctorSelect.value = singleDoctorId;
-                } else if (!selectedDoctorId) {
-                    // Если предварительно не выбран - выбираем единственного
-                    doctorSelect.value = singleDoctorId;
-                } else {
-                    // Если предварительно выбран другой врач (не из списка)
-                    // Показываем сообщение или оставляем пустым
-                    doctorSelect.value = '';
-                }
-            } else if (doctors.length > 1) {
-                // Если несколько врачей
-                // Проверяем, есть ли предварительно выбранный врач в списке
-                if (selectedDoctorId) {
-                    const doctorExists = doctors.some(d => d.id == selectedDoctorId);
-                    if (doctorExists) {
-                        doctorSelect.value = selectedDoctorId;
-                    } else {
-                        // Если предварительно выбранного врача нет в списке
-                        // оставляем пустым
-                        doctorSelect.value = '';
-                    }
-                } else {
-                    // Если предварительно не выбран - оставляем пустым
-                    doctorSelect.value = '';
+            if (selectedDoctorId) {
+                const doctorExists = doctors.some(d => d.id == selectedDoctorId);
+                if (doctorExists) {
+                    doctorSelect.value = selectedDoctorId;
                 }
             }
+
+            if (doctors.length === 1 && !selectedDoctorId) {
+                doctorSelect.value = doctors[0].id;
+            }
         } else {
-            // Если услуга не выбрана - очищаем список врачей
-            doctorSelect.innerHTML = '<option value="">Сначала выберите услугу</option>';
+            doctorSelect.innerHTML = '<option value="">Нет врачей для этой услуги</option>';
         }
     }
 
-    // Обновляем врачей при загрузке
-    updateDoctors();
+    if (serviceSelect.value) {
+        updateDoctors();
+    }
 
-    // Обновляем врачей при изменении услуги
     serviceSelect.addEventListener('change', updateDoctors);
+});
+
+// Автоматически скрываем сообщения об ошибках через 5 секунд
+document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.alert-error');
+    if (alerts.length > 0) {
+        setTimeout(function() {
+            alerts.forEach(function(alert) {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(function() {
+                    alert.remove();
+                }, 500);
+            });
+        }, 5000);
+    }
 });
 </script>
 {% endblock %}

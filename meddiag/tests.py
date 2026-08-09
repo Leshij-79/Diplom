@@ -1,12 +1,19 @@
+from datetime import datetime, timedelta
+
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.messages import get_messages
+from django.core import mail
 from django.test import TestCase, RequestFactory
 from django.urls import reverse
+from django.utils import timezone
 
 from django.views.generic import TemplateView
+from icecream import ic
 
 from meddiag.mixins import CompanyInfoMixin
-from meddiag.models import AboutCompany, Contacts, Direction, Services, Doctors
-from meddiag.views import IndexListView, ServicesListView, DoctorsListView
+from meddiag.models import AboutCompany, Contacts, Direction, Services, Doctors, Appointment
+from meddiag.views import IndexListView, ServicesListView, DoctorsListView, AppointmentCreateView
+from users.models import CustomUser
 
 
 class TestView(CompanyInfoMixin, TemplateView):
@@ -326,6 +333,28 @@ class DoctorDetailViewTest(TestCase):
 
 class AppointmentCreateViewTest(TestCase):
     def setUp(self):
+        self.user = CustomUser.objects.create_user(
+            username="testuser",
+            password="testpass123",
+            email="test@test.ru",
+            first_name="Test",
+            last_name="User",
+            middle_name="User"
+        )
+
+        self.contacts = Contacts.objects.create(
+            phone="+7 (495) 123-45-67",
+            email="info@meddiagnostic.ru",
+            address="г. Москва, ул. Медицинская, 10",
+            work_days="Пн-Пт",
+            hour_start="8",
+            hour_end="20",
+            work_days_second="Сб",
+            hour_start_second="9",
+            hour_end_second="18",
+            weekend="Вс",
+        )
+
         self.direction = Direction.objects.create(
             title="Кардиология",
             name="Кардиология",
@@ -343,3 +372,238 @@ class AppointmentCreateViewTest(TestCase):
             direction=self.direction,
         )
         self.service.doctors.add(self.doctor)
+
+    def test_appointment_create_view(self):
+        self.client.login(username="test@test.ru", password="testpass123")
+
+        response = self.client.get(
+            reverse("meddiag:appointment_create"),
+            {"doctor": self.doctor.pk, "service": self.service.pk}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "appointment_create.html")
+        self.assertIn("services", response.context)
+        self.assertIn("doctor_for_service", response.context)
+
+    def test_appointment_create_view_without_params(self):
+        self.client.login(username="test@test.ru", password="testpass123")
+
+        response = self.client.get(reverse("meddiag:appointment_create"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "appointment_create.html")
+        self.assertIsNone(response.context.get("selected_service"))
+        self.assertIsNone(response.context.get("selected_doctor"))
+
+    def test_appointment_create_view_requires_login(self):
+        response = self.client.get(reverse("meddiag:appointment_create"))
+
+        self.assertEqual(response.status_code, 302)
+
+    def test_form_valid(self):
+        self.client.force_login(self.user)
+
+        future_datetime = timezone.now() + timedelta(days=1)
+
+        url = reverse("meddiag:appointment_create")
+
+        data = {
+            "services": self.service.id,
+            "doctor": self.doctor.id,
+            "datetime": future_datetime.strftime("%Y-%m-%d %H:%M"),
+        }
+
+        response = self.client.post(url, data, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+
+        appointment = Appointment.objects.filter(
+            patient=self.user,
+            doctor=self.doctor,
+            services=self.service,
+            status="active"
+        ).first()
+        self.assertIsNotNone(appointment)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].subject, "Запись на приём")
+        self.assertEqual(mail.outbox[0].to[0], self.user.email)
+
+    def test_form_valid_with_invalid_doctor(self):
+        self.client.force_login(self.user)
+
+        future_datetime = timezone.now() + timedelta(days=1)
+
+        url = reverse("meddiag:appointment_create")
+
+        data = {
+            "services": self.service.id,
+            "doctor": 666,
+            "datetime": future_datetime.strftime("%Y-%m-%d %H:%M"),
+        }
+
+        response = self.client.post(url, data)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_initial_with_params(self):
+        self.client.force_login(self.user)
+
+        url = reverse("meddiag:appointment_create")
+        response = self.client.get(url, {
+            "service": self.service.id,
+            "doctor": self.doctor.id
+        })
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_initial_without_params(self):
+        self.client.force_login(self.user)
+
+        url = reverse("meddiag:appointment_create")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.context.get("selected_service"))
+        self.assertIsNone(response.context.get("selected_doctor"))
+
+
+class ProfileViewTest(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(
+            username="testuser",
+            password="testpass123",
+            email="test@test.ru",
+            first_name="Test",
+            last_name="User",
+            middle_name="User"
+        )
+
+    def test_get_object(self):
+        self.client.login(username="test@test.ru", password="testpass123")
+
+        response = self.client.get(reverse("meddiag:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "profile.html")
+
+
+class AppointmentCancelViewTest(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(
+            username="testuser",
+            password="testpass123",
+            email="test@test.ru",
+            first_name="Test",
+            last_name="User",
+            middle_name="User"
+        )
+
+        self.contacts = Contacts.objects.create(
+            phone="+7 (495) 123-45-67",
+            email="info@meddiagnostic.ru",
+            address="г. Москва, ул. Медицинская, 10",
+            work_days="Пн-Пт",
+            hour_start="8",
+            hour_end="20",
+            work_days_second="Сб",
+            hour_start_second="9",
+            hour_end_second="18",
+            weekend="Вс",
+        )
+
+        self.direction = Direction.objects.create(
+            title="Кардиология",
+            name="Кардиология",
+        )
+        self.doctor = Doctors.objects.create(
+            last_name="Иванов",
+            first_name="Иван",
+            middle_name="Иванович",
+            specialization="Кардиолог",
+            direction=self.direction,
+        )
+        self.service = Services.objects.create(
+            title="Кардиология",
+            name="Кардиология",
+            direction=self.direction,
+        )
+        self.service.doctors.add(self.doctor)
+
+        self.appointment = Appointment.objects.create(
+            patient=self.user,
+            doctor=self.doctor,
+            services=self.service,
+            status="active",
+            datetime=timezone.now() + timedelta(days=1),
+        )
+
+    def test_post(self):
+        self.client.login(username="test@test.ru", password="testpass123")
+
+        url = reverse("meddiag:appointment_cancel",kwargs={"pk": self.appointment.pk})
+
+        response = self.client.post(url, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "appointment_detail.html")
+
+        self.appointment.refresh_from_db()
+        self.assertEqual(self.appointment.status, "cancel")
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].subject, "Отмена записи на приём")
+        self.assertEqual(mail.outbox[0].to[0], self.user.email)
+
+
+class ContactFormViewTest(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(
+            username="testuser",
+            password="testpass123",
+            email="test@test.ru",
+            first_name="Test",
+            last_name="User",
+            middle_name="User",
+            phone_number="71234567890",
+        )
+
+        self.contacts = Contacts.objects.create(
+            phone="+7 (495) 123-45-67",
+            email="info@meddiagnostic.ru",
+            address="г. Москва, ул. Медицинская, 10",
+            work_days="Пн-Пт",
+            hour_start="8",
+            hour_end="20",
+            work_days_second="Сб",
+            hour_start_second="9",
+            hour_end_second="18",
+            weekend="Вс",
+        )
+
+        self.about = AboutCompany.objects.create(
+            small_name="Test",
+            full_name="Test",
+            slogan="Test slogan",
+            history="Test history",
+            mission="Test mission",
+            doctors="Test doctors",
+        )
+
+    def test_send_email(self):
+        url = reverse("meddiag:contact_form")
+
+        name = self.user.first_name
+        email = self.user.email
+        phone = self.user.phone_number
+        subject = "question"
+        message = "Test message"
+
+        to_email = self.contacts.email
+
+        response = self.client.post(url, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "appointment_detail.html")
+

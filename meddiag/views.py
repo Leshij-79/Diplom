@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import DetailView, FormView, ListView, TemplateView
 
 from config.settings import EMAIL_HOST_USER
@@ -142,61 +143,30 @@ class AppointmentCreateView(CompanyInfoMixin, LoginRequiredMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         context["services"] = Services.objects.all().select_related("direction")
-
-        service_id = self.request.GET.get("service") or self.request.POST.get("service")
-        if service_id:
-            try:
-                context["selected_service"] = Services.objects.get(pk=service_id)
-            except Services.DoesNotExist:
-                pass
-
-        doctor_id = self.request.GET.get("doctor") or self.request.POST.get("doctor")
-        if doctor_id:
-            try:
-                context["selected_doctor"] = Doctors.objects.get(pk=doctor_id)
-            except Doctors.DoesNotExist:
-                pass
 
         doctor_for_service = {}
         for service in context["services"]:
             doctors = service.doctors.all()
-            doctor_list = []  # Создаем список для каждого сервиса
-
+            doctor_list = []
             for doctor in doctors:
-                doctor_list.append(
-                    {
-                        "id": doctor.id,
-                        "last_name": doctor.last_name,
-                        "first_name": doctor.first_name,
-                        "middle_name": doctor.middle_name,
-                        "specialization": doctor.specialization,
-                    }
-                )
-
+                doctor_list.append({
+                    "id": doctor.id,
+                    "last_name": doctor.last_name,
+                    "first_name": doctor.first_name,
+                    "middle_name": doctor.middle_name,
+                    "specialization": doctor.specialization,
+                })
             doctor_for_service[str(service.id)] = doctor_list
 
-        context["doctor_for_service"] = json.dumps(doctor_for_service)
-
-        context["date"] = date.today().isoformat()
-
-        if self.request.method == "POST":
-            context["selected_date"] = self.request.POST.get("date")
-            context["selected_time"] = self.request.POST.get("time")
-            context["comment"] = self.request.POST.get("comment")
-
-        context["from_service"] = self.request.GET.get("from_service")
-        context["from_doctor"] = self.request.GET.get("from_doctor")
+        context["doctor_for_service"] = json.dumps(doctor_for_service, ensure_ascii=False)
 
         return context
 
     def form_valid(self, form):
-        service_id = self.request.POST.get("services")
-        doctor_id = self.request.POST.get("doctor")
+        service = form.cleaned_data.get("services")
+        doctor = form.cleaned_data.get("doctor")
         appointment_datetime = form.cleaned_data.get("datetime")
-        service = get_object_or_404(Services, pk=service_id)
-        doctor = get_object_or_404(Doctors, pk=doctor_id)
         contacts = Contacts.objects.first()
 
         if not all([service, doctor, appointment_datetime]):
@@ -204,7 +174,6 @@ class AppointmentCreateView(CompanyInfoMixin, LoginRequiredMixin, FormView):
             return self.form_invalid(form)
 
         try:
-
             if appointment_datetime.hour < int(contacts.hour_start) or appointment_datetime.hour > int(
                 contacts.hour_end
             ):
@@ -316,9 +285,8 @@ class AppointmentDetailView(CompanyInfoMixin, LoginRequiredMixin, DetailView):
         return Appointment.objects.filter(patient=self.request.user)
 
 
-class AppointmentCancelView(CompanyInfoMixin, LoginRequiredMixin, TemplateView):
+class AppointmentCancelView(CompanyInfoMixin, LoginRequiredMixin, View):
     model = Appointment
-    template_name = "appointment_cancel.html"
     context_object_name = "appointment_cancel"
 
     def post(self, request, *args, **kwargs):
