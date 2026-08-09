@@ -594,16 +594,49 @@ class ContactFormViewTest(TestCase):
     def test_send_email(self):
         url = reverse("meddiag:contact_form")
 
-        name = self.user.first_name
-        email = self.user.email
-        phone = self.user.phone_number
-        subject = "question"
-        message = "Test message"
+        data = {
+            "name": self.user.first_name,
+            "email": self.user.email,
+            "phone": self.user.phone_number,
+            "subject": "question",
+            "message": "Test message",
+        }
 
-        to_email = self.contacts.email
-
-        response = self.client.post(url, follow=True)
+        response = self.client.post(url, data, follow=True)
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "appointment_detail.html")
+        self.assertTemplateUsed(response, "contact_form_success.html")
+
+        self.assertEqual(len(mail.outbox), 2)
+
+        self.assertEqual(mail.outbox[0].subject, "Сообщение с формы обратной связи")
+        self.assertEqual(mail.outbox[0].to[0], self.contacts.email)
+
+        self.assertEqual(mail.outbox[1].subject, f"Копия вашего обращения в {self.about.small_name}")
+        self.assertEqual(mail.outbox[1].to[0], self.user.email)
+
+    def test_contact_form_view_get(self):
+        response = self.client.get(reverse("meddiag:contact_form"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "contact_form.html")
+        self.assertIn("form", response.context)
+
+    def test_contact_form_without_required_fields(self):
+        url = reverse("meddiag:contact_form")
+
+        response = self.client.post(url, {}, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "contact_form.html")
+
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_contact_form_success_view(self):
+        self.client.login(username="test@test.ru", password="testpass123")
+
+        response = self.client.get(reverse("meddiag:contact_form_success"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "contact_form_success.html")
 
