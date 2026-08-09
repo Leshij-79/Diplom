@@ -270,3 +270,76 @@ class DoctorsListViewTest(TestCase):
         response = self.client.get(reverse("meddiag:doctors_list"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "doctors_list.html")
+
+
+class DoctorDetailViewTest(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.direction = Direction.objects.create(
+            title="Кардиология",
+            name="Кардиология",
+        )
+        self.doctor = Doctors.objects.create(
+            last_name="Иванов",
+            first_name="Иван",
+            middle_name="Иванович",
+            specialization="Кардиолог",
+            direction=self.direction,
+        )
+        self.service = Services.objects.create(
+            title="Кардиология",
+            name="Кардиология",
+            direction=self.direction,
+        )
+        self.service.doctors.add(self.doctor)
+
+    def test_doctor_detail_view(self):
+        response = self.client.get(reverse("meddiag:doctor_detail", kwargs={"pk": self.doctor.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "doctor_detail.html")
+        self.assertIn("doctor", response.context)
+        self.assertEqual(response.context["doctor"], self.doctor)
+
+    def test_doctor_detail_view_with_service(self):
+        response = self.client.get(
+            reverse("meddiag:doctor_detail", kwargs={"pk": self.doctor.pk}) + f"?service_id={self.service.pk}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "doctor_detail.html")
+        self.assertIn("services", response.context)
+        self.assertEqual(response.context["services"][0], self.service)
+
+    def test_doctor_detail_view_no_doctor(self):
+        response = self.client.get(reverse("meddiag:doctor_detail", kwargs={"pk": 666}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_doctor_detail_view_context(self):
+        # Проверка наличия всех необходимых данных в контексте
+        response = self.client.get(reverse("meddiag:doctor_detail", kwargs={"pk": self.doctor.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("services", response.context)
+        self.assertIn("doctor", response.context)
+        self.assertIn("from_service_page", response.context)
+        self.assertIn("about_company", response.context)
+        self.assertIn("contacts", response.context)
+
+
+class AppointmentCreateViewTest(TestCase):
+    def setUp(self):
+        self.direction = Direction.objects.create(
+            title="Кардиология",
+            name="Кардиология",
+        )
+        self.doctor = Doctors.objects.create(
+            last_name="Иванов",
+            first_name="Иван",
+            middle_name="Иванович",
+            specialization="Кардиолог",
+            direction=self.direction,
+        )
+        self.service = Services.objects.create(
+            title="Кардиология",
+            name="Кардиология",
+            direction=self.direction,
+        )
+        self.service.doctors.add(self.doctor)
