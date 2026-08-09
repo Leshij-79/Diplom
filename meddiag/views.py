@@ -1,5 +1,5 @@
 import json
-from datetime import date, datetime
+from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -150,13 +150,15 @@ class AppointmentCreateView(CompanyInfoMixin, LoginRequiredMixin, FormView):
             doctors = service.doctors.all()
             doctor_list = []
             for doctor in doctors:
-                doctor_list.append({
-                    "id": doctor.id,
-                    "last_name": doctor.last_name,
-                    "first_name": doctor.first_name,
-                    "middle_name": doctor.middle_name,
-                    "specialization": doctor.specialization,
-                })
+                doctor_list.append(
+                    {
+                        "id": doctor.id,
+                        "last_name": doctor.last_name,
+                        "first_name": doctor.first_name,
+                        "middle_name": doctor.middle_name,
+                        "specialization": doctor.specialization,
+                    }
+                )
             doctor_for_service[str(service.id)] = doctor_list
 
         context["doctor_for_service"] = json.dumps(doctor_for_service, ensure_ascii=False)

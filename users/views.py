@@ -10,10 +10,7 @@ from django.views.generic import FormView
 
 from config.settings import EMAIL_HOST_USER
 from meddiag.mixins import CompanyInfoMixin
-from users.forms import (
-    CustomAuthenticationForm,
-    CustomUserCreationForm,
-)
+from users.forms import CustomAuthenticationForm, CustomUserCreationForm
 from users.models import CustomUser
 
 

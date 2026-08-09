@@ -1,6 +1,5 @@
 from django.core import mail
 from django.test import TestCase
-
 from django.urls import reverse
 
 from users.models import CustomUser
@@ -74,7 +73,7 @@ class RegisterViewTest(TestCase):
     def test_register(self):
         url = reverse("users:register")
 
-        data ={
+        data = {
             "username": "testuser",
             "password1": "testpass123",
             "password2": "testpass123",

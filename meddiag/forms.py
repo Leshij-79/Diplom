@@ -7,18 +7,19 @@ class AppointmentForm(forms.ModelForm):
     """
     Форма для записи на прием
     """
+
     class Meta:
         model = Appointment
-        fields = ['services', 'doctor', 'datetime']
+        fields = ["services", "doctor", "datetime"]
         widgets = {
-            'datetime': forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"}),
-            'services': forms.Select(attrs={'class': 'form-control', 'id': 'id_service'}),
-            'doctor': forms.Select(attrs={'class': 'form-control', 'id': 'id_doctor'}),
+            "datetime": forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"}),
+            "services": forms.Select(attrs={"class": "form-control", "id": "id_service"}),
+            "doctor": forms.Select(attrs={"class": "form-control", "id": "id_doctor"}),
         }
         labels = {
-            'services': 'Услуга',
-            'doctor': 'Врач',
-            'datetime': 'Дата и время',
+            "services": "Услуга",
+            "doctor": "Врач",
+            "datetime": "Дата и время",
         }
 
     def __init__(self, *args, **kwargs):
@@ -26,27 +27,25 @@ class AppointmentForm(forms.ModelForm):
 
         service_id = None
 
-        if 'services' in self.data:
+        if "services" in self.data:
             try:
-                service_id = int(self.data.get('services'))
+                service_id = int(self.data.get("services"))
             except (ValueError, TypeError):
                 pass
-        elif self.initial and 'services' in self.initial:
-            service_id = self.initial.get('services')
+        elif self.initial and "services" in self.initial:
+            service_id = self.initial.get("services")
         elif self.instance.pk:
             service_id = self.instance.services_id
 
         if service_id:
             try:
-                self.fields['doctor'].queryset = Doctors.objects.filter(
-                    doctors_service__id=service_id
-                ).distinct()
+                self.fields["doctor"].queryset = Doctors.objects.filter(doctors_service__id=service_id).distinct()
             except (ValueError, TypeError):
-                self.fields['doctor'].queryset = Doctors.objects.all()
+                self.fields["doctor"].queryset = Doctors.objects.all()
         elif self.instance.pk:
-            self.fields['doctor'].queryset = self.instance.services.doctors.all()
+            self.fields["doctor"].queryset = self.instance.services.doctors.all()
         else:
-            self.fields['doctor'].queryset = Doctors.objects.all()
+            self.fields["doctor"].queryset = Doctors.objects.all()
 
 
 class ContactForm(forms.Form):

@@ -1,18 +1,15 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.contrib.auth.models import AnonymousUser
-from django.contrib.messages import get_messages
 from django.core import mail
-from django.test import TestCase, RequestFactory
+from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils import timezone
-
 from django.views.generic import TemplateView
-from icecream import ic
 
 from meddiag.mixins import CompanyInfoMixin
-from meddiag.models import AboutCompany, Contacts, Direction, Services, Doctors, Appointment
-from meddiag.views import IndexListView, ServicesListView, DoctorsListView, AppointmentCreateView
+from meddiag.models import AboutCompany, Appointment, Contacts, Direction, Doctors, Services
+from meddiag.views import DoctorsListView, IndexListView, ServicesListView
 from users.models import CustomUser
 
 
@@ -339,7 +336,7 @@ class AppointmentCreateViewTest(TestCase):
             email="test@test.ru",
             first_name="Test",
             last_name="User",
-            middle_name="User"
+            middle_name="User",
         )
 
         self.contacts = Contacts.objects.create(
@@ -377,8 +374,7 @@ class AppointmentCreateViewTest(TestCase):
         self.client.login(username="test@test.ru", password="testpass123")
 
         response = self.client.get(
-            reverse("meddiag:appointment_create"),
-            {"doctor": self.doctor.pk, "service": self.service.pk}
+            reverse("meddiag:appointment_create"), {"doctor": self.doctor.pk, "service": self.service.pk}
         )
 
         self.assertEqual(response.status_code, 200)
@@ -419,10 +415,7 @@ class AppointmentCreateViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
         appointment = Appointment.objects.filter(
-            patient=self.user,
-            doctor=self.doctor,
-            services=self.service,
-            status="active"
+            patient=self.user, doctor=self.doctor, services=self.service, status="active"
         ).first()
         self.assertIsNotNone(appointment)
 
@@ -451,10 +444,7 @@ class AppointmentCreateViewTest(TestCase):
         self.client.force_login(self.user)
 
         url = reverse("meddiag:appointment_create")
-        response = self.client.get(url, {
-            "service": self.service.id,
-            "doctor": self.doctor.id
-        })
+        response = self.client.get(url, {"service": self.service.id, "doctor": self.doctor.id})
 
         self.assertEqual(response.status_code, 200)
 
@@ -477,7 +467,7 @@ class ProfileViewTest(TestCase):
             email="test@test.ru",
             first_name="Test",
             last_name="User",
-            middle_name="User"
+            middle_name="User",
         )
 
     def test_get_object(self):
@@ -497,7 +487,7 @@ class AppointmentCancelViewTest(TestCase):
             email="test@test.ru",
             first_name="Test",
             last_name="User",
-            middle_name="User"
+            middle_name="User",
         )
 
         self.contacts = Contacts.objects.create(
@@ -542,7 +532,7 @@ class AppointmentCancelViewTest(TestCase):
     def test_post(self):
         self.client.login(username="test@test.ru", password="testpass123")
 
-        url = reverse("meddiag:appointment_cancel",kwargs={"pk": self.appointment.pk})
+        url = reverse("meddiag:appointment_cancel", kwargs={"pk": self.appointment.pk})
 
         response = self.client.post(url, follow=True)
 
@@ -639,4 +629,3 @@ class ContactFormViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "contact_form_success.html")
-
