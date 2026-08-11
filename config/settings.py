@@ -12,9 +12,17 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS")
+ALLOWED_HOSTS_RAW = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1")
+if ALLOWED_HOSTS_RAW == "*":
+    ALLOWED_HOSTS = ["*"]
+else:
+    ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_RAW.split(",")]
 
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS")
+CSRF_TRUSTED_ORIGINS_RAW = os.getenv("CSRF_TRUSTED_ORIGINS", "http://localhost,http://127.0.0.1")
+if CSRF_TRUSTED_ORIGINS_RAW == "*":
+    CSRF_TRUSTED_ORIGINS = ["*"]
+else:
+    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS_RAW.split(",")]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -121,10 +129,6 @@ SPECTACULAR_SETTINGS = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8000",
-]
-
-CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
 ]
 
