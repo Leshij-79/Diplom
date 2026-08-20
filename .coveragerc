@@ -1,0 +1,50 @@
+[run]
+source = .
+omit =
+    */migrations/*
+    */tests/*
+    */admin.py
+    manage.py
+    */settings.py
+    */wsgi.py
+    */asgi.py
+    */__init__.py
+    */apps.py
+    */models.py
+    */forms.py
+    */tests.py
+    */urls.py
+
+[report]
+omit =
+    */migrations/*
+    */tests/*
+    */admin.py
+    manage.py
+    */settings.py
+    */wsgi.py
+    */asgi.py
+    */__init__.py
+    */apps.py
+    */models.py
+    */forms.py
+    */tests.py
+    */urls.py
+
+# Исключить файлы с покрытием выше порога
+skip_covered = False
+
+# Исключить файлы с покрытием 100%
+skip_empty = False
+
+# Показывать только файлы с покрытием ниже 80%
+fail_under = 99
+
+# Формат вывода
+show_missing = True
+
+[html]
+directory = coverage_html_report
+
+[xml]
+output = coverage.xml

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная - {{ about_company.full_name }}{% endblock %}
+
+{% block content %}
+<!-- Hero секция -->
+<section class="hero">
+    <h2>Забота о вашем здоровье</h2>
+    <p>
+        {{ about_company.slogan }}
+    </p>
+    {% if user.is_authenticated %}
+        <button class="btn-primary" onclick="openAppointmentForm()">Записаться на прием</button>
+    {% else %}
+        <button class="btn-primary" onclick="openLoginForm()">Войти</button>
+    {% endif %}
+</section>
+
+<!-- Услуги -->
+<section class="section" id="services">
+    <h2>Наши услуги</h2>
+    <div class="services-grid">
+        {% if object_list %}
+            {% for direction in object_list %}
+                <div class="service-card">
+                    <img src="{{ direction.image }}" alt="{{ direction.title }}">
+                    <a href="{% url 'meddiag:services_list_index' direction.pk %}"
+                        style="text-decoration: none; color: inherit; transition: all 0.3s ease;">
+                        <h3 style="margin: 10px 0 5px 0; color: #2c3e50; transition: color 0.3s ease;"
+                            onmouseover="this.style.color='#2e86c1'; this.parentElement.style.textDecoration='underline';"
+                            onmouseout="this.style.color='#2c3e50'; this.parentElement.style.textDecoration='none';">
+                        {{ direction.title }}</h3>
+                    </a>
+                    <a href="{% url 'meddiag:services_list_index' direction.pk %}"
+                       style="text-decoration: none; color: #555; transition: all 0.3s ease;">
+                        <p style="margin: 0; color: #555; transition: color 0.3s ease;"
+                           onmouseover="this.style.color='#2e86c1'; this.parentElement.style.textDecoration='underline';"
+                           onmouseout="this.style.color='#555'; this.parentElement.style.textDecoration='none';">
+                        {{ direction.name }}</p>
+                    </a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <h1 class="display-4">Нет услуг</h1>
+        {% endif %}
+
+    </div>
+</section>
+
+{% endblock %}

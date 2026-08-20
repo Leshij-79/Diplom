@@ -1,0 +1,49 @@
+<!-- Подвал сайта -->
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-grid">
+            <div>
+                <h3>{% if about_company %}{{ about_company.small_name }}{% else %}МедДиагностика{% endif %}</h3>
+                <p style="color: #999; font-size: 0.9rem;">
+                    {% if about_company %}{{ about_company.slogan }}{% else %}Современная медицинская диагностика с использованием передовых технологий.{% endif %}
+                </p>
+            </div>
+            <div>
+                <h3>Быстрые ссылки</h3>
+                <ul>
+                    <li><a href="{% url 'meddiag:about' %}">О компании</a></li>
+                    <li><a href="{% url 'meddiag:services_list' %}">Услуги</a></li>
+                    <li><a href="{% url 'meddiag:doctors_list' %}">Врачи</a></li>
+                    <li><a href="{% url 'meddiag:contacts' %}">Контакты</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3>Контакты</h3>
+                <ul>
+                    <li>📞 {% if contacts %}{{ contacts.phone }}{% else %}+7 (495) 123-45-67{% endif %}</li>
+                    <li>✉️ {% if contacts %}{{ contacts.email }}{% else %}info@meddiagnostic.ru{% endif %}</li>
+                    <li>📍 {% if contacts %}{{ contacts.address }}{% else %}г. Москва, ул. Медицинская, 10{% endif %}</li>
+                </ul>
+            </div>
+            <div>
+                <h3>Часы работы</h3>
+                <ul>
+                    {% if contacts %}
+                        <li>{{ contacts.work_days }}: {{ contacts.hour_start }}:00 - {{ contacts.hour_end }}:00</li>
+                        {% if contacts.work_days_second %}
+                            <li>{{ contacts.work_days_second }}: {{ contacts.hour_start_second }}:00 - {{ contacts.hour_end_second }}:00</li>
+                        {% endif %}
+                        <li>{{ contacts.weekend }}: выходной</li>
+                    {% else %}
+                        <li>Пн-Пт: 8:00 - 20:00</li>
+                        <li>Сб: 9:00 - 18:00</li>
+                        <li>Вс: выходной</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2024 {% if about_company %}{{ about_company.small_name }}{% else %}МедДиагностика{% endif %}. Все права защищены.
+        </div>
+    </div>
+</footer>
