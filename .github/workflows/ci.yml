@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - Develop
+      - Feature/Diplom
 
 jobs:
   lint:
