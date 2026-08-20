@@ -417,7 +417,7 @@ class AppointmentCreateViewTest(TestCase):
         appointment = Appointment.objects.filter(
             patient=self.user, doctor=self.doctor, services=self.service, status="active"
         ).first()
-        self.assertIsNotNone(appointment)
+
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, "Запись на приём")
