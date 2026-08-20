@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Услуги - {{ about_company.full_name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/services.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="section services-section">
+    <div class="services-header">
+        <h2>
+            {% if current_direction %}
+                {{ current_direction.name }}
+            {% else %}
+                Наши услуги
+            {% endif %}
+        </h2>
+        <p>Выберите направление диагностики, чтобы ознакомиться с полным перечнем услуг</p>
+    </div>
+
+    <!-- Категории услуг -->
+    <div class="categories-tabs">
+        <a href="{% url 'meddiag:services_list' %}"
+           class="category-tab {% if not current_category_id %}active{% endif %}"
+           data-category="all">
+            Все услуги
+        </a>
+        {% for direction in directions %}
+            <a href="{% url 'meddiag:services_list_index' direction.pk %}"
+               class="category-tab {% if current_category_id|stringformat:'s' == direction.pk|stringformat:'s' %}active{% endif %}"
+               data-category="{{ direction.id }}">
+                {{ direction.title }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <!-- Список услуг -->
+    <div class="services-grid">
+        {% for service in services_list %}
+        <div class="service-item" data-category="{{ service.direction.id }}">
+            <div class="service-icon">
+                <i class="fas fa-stethoscope"></i>
+            </div>
+            <div class="service-info">
+                <h3>
+                    <a href="{% url 'meddiag:service_detail' service.pk %}?next={{ request.path }}"
+                       class="service-link">
+                        {{ service.name }}
+                    </a>
+                </h3>
+                <p class="service-description">{{ service.description|truncatechars:100 }}</p>
+                <div class="service-meta">
+                    <span class="service-price">
+                        <i class="fas fa-ruble-sign"></i> {{ service.price }} ₽
+                    </span>
+                    <span class="service-duration">
+                        <i class="fas fa-clock"></i> {{ service.duration_execution }} мин
+                    </span>
+                    <span class="service-direction">
+                        <i class="fas fa-tag"></i> {{ service.direction.title }}
+                    </span>
+                </div>
+                <a href="{% url 'meddiag:service_detail' service.pk %}"
+                   class="btn-service-detail">
+                    Подробнее <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-services">
+            <i class="fas fa-stethoscope"></i>
+            <p>В данной категории пока нет услуг</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.category-tab');
+    const services = document.querySelectorAll('.service-item');
+
+    // Определяем текущую активную категорию
+    const activeTab = document.querySelector('.category-tab.active');
+    let currentCategory = 'all';
+    if (activeTab) {
+        currentCategory = activeTab.dataset.category;
+    }
+
+    // Фильтруем услуги при загрузке страницы
+    services.forEach(service => {
+        if (currentCategory === 'all' || service.dataset.category === currentCategory) {
+            service.style.display = 'block';
+        } else {
+            service.style.display = 'none';
+        }
+    });
+
+    // Обработчики кликов для табов
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            // Если это ссылка, она уже перенаправит на нужный URL
+            // Но мы все равно обновляем активный класс для визуального эффекта
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+});
+</script>
+{% endblock %}

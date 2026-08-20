@@ -1,0 +1,506 @@
+/* ============================================
+   СТИЛИ ДЛЯ СТРАНИЦЫ ОБРАТНОЙ СВЯЗИ
+   ============================================ */
+
+/* ---------- Контейнер ---------- */
+.contact-form-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+    padding: 2rem 1rem;
+}
+
+.contact-form-container {
+    background: white;
+    padding: 3rem;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(26, 82, 118, 0.15);
+    max-width: 650px;
+    width: 100%;
+    transition: transform 0.3s ease;
+}
+
+.contact-form-container:hover {
+    transform: translateY(-5px);
+}
+
+/* ---------- Заголовок ---------- */
+.contact-form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.contact-form-icon {
+    background: linear-gradient(135deg, #1a5276, #2e86c1);
+    padding: 20px;
+    border-radius: 50%;
+    color: white;
+    font-size: 40px;
+    margin-bottom: 1rem;
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+    line-height: 80px;
+    text-align: center;
+}
+
+.contact-form-header h2 {
+    color: #1a5276;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.contact-form-header p {
+    color: #7f8c8d;
+    font-size: 0.95rem;
+}
+
+/* ---------- Форма ---------- */
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+/* ---------- Группы полей ---------- */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-group label {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.form-group label i {
+    color: #2e86c1;
+    margin-right: 8px;
+}
+
+.form-group label .required {
+    color: #e74c3c;
+    font-weight: 700;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 12px 16px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    font-family: 'Montserrat', sans-serif;
+    background: white;
+    width: 100%;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #2e86c1;
+    box-shadow: 0 0 0 3px rgba(46, 134, 193, 0.1);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #b0bec5;
+}
+
+.form-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2395a5a6' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    cursor: pointer;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-group .field-error {
+    font-size: 0.8rem;
+    color: #e74c3c;
+    margin-top: 2px;
+}
+
+/* ---------- Капча ---------- */
+.captcha-group .captcha-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.captcha-code {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    padding: 10px 20px;
+    background: #f0f4f8;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: #1a5276;
+    font-family: 'Courier New', monospace;
+    user-select: none;
+}
+
+.captcha-group .captcha-container input {
+    flex: 1;
+}
+
+.captcha-refresh {
+    padding: 10px 14px;
+    background: #2e86c1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.captcha-refresh:hover {
+    background: #1a5276;
+    transform: rotate(180deg);
+}
+
+/* ---------- Контактная информация под формой ---------- */
+.contact-info-block {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    padding: 1.2rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    margin: 0.5rem 0;
+}
+
+.info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+}
+
+.info-item i {
+    color: #2e86c1;
+    font-size: 1.2rem;
+    margin-top: 2px;
+}
+
+.info-item strong {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+}
+
+.info-item p {
+    margin: 0;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+/* ---------- Кнопки ---------- */
+.contact-form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.btn-submit {
+    flex: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #1a5276, #2e86c1);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(46, 134, 193, 0.35);
+}
+
+.btn-submit i {
+    font-size: 1.2rem;
+}
+
+.btn-reset {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: #95a5a6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.btn-reset:hover {
+    background: #7f8c8d;
+    transform: translateY(-2px);
+}
+
+.btn-reset i {
+    font-size: 1.1rem;
+}
+
+/* ---------- Сообщения ---------- */
+.alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+.alert-error {
+    background: #fde8e8;
+    border: 1px solid #f5c6c6;
+    color: #c0392b;
+}
+
+.alert-error i {
+    color: #c0392b;
+    font-size: 1.2rem;
+}
+
+.alert-success {
+    background: #e8f8ed;
+    border: 1px solid #a3e4b5;
+    color: #27ae60;
+}
+
+.alert-success i {
+    color: #27ae60;
+    font-size: 1.2rem;
+}
+
+.alert-info {
+    background: #e8f4f8;
+    border: 1px solid #aed6f1;
+    color: #2e86c1;
+}
+
+.alert-info i {
+    color: #2e86c1;
+    font-size: 1.2rem;
+}
+
+/* ============================================
+   СТРАНИЦА УСПЕХА
+   ============================================ */
+
+.success-container {
+    text-align: center;
+}
+
+.success-icon {
+    font-size: 80px;
+    color: #27ae60;
+    margin-bottom: 1rem;
+}
+
+.success-container h2 {
+    color: #1a5276;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.success-container p {
+    color: #7f8c8d;
+    font-size: 1.05rem;
+    margin-bottom: 1.5rem;
+}
+
+.success-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-bottom: 2rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #555;
+}
+
+.detail-item i {
+    color: #2e86c1;
+    font-size: 1.2rem;
+}
+
+.success-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.success-actions .btn-submit,
+.success-actions .btn-back {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.success-actions .btn-submit {
+    background: linear-gradient(135deg, #1a5276, #2e86c1);
+    color: white;
+}
+
+.success-actions .btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(46, 134, 193, 0.35);
+    color: white;
+}
+
+.success-actions .btn-back {
+    background: #27ae60;
+    color: white;
+}
+
+.success-actions .btn-back:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.35);
+    background: #219a52;
+    color: white;
+}
+
+/* ---------- Анимации ---------- */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.contact-form-container {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* ---------- Адаптивность ---------- */
+@media (max-width: 600px) {
+    .contact-form-container {
+        padding: 2rem 1.5rem;
+        margin: 0 1rem;
+    }
+
+    .contact-form-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .contact-form-header .contact-form-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 30px;
+        line-height: 60px;
+        padding: 0;
+    }
+
+    .contact-form-actions {
+        flex-direction: column;
+    }
+
+    .btn-submit,
+    .btn-reset {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .contact-info-block {
+        grid-template-columns: 1fr;
+    }
+
+    .captcha-group .captcha-container {
+        flex-wrap: wrap;
+    }
+
+    .captcha-code {
+        min-width: 100px;
+        font-size: 1.2rem;
+        padding: 8px 16px;
+    }
+
+    .success-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 400px) {
+    .contact-form-container {
+        padding: 1.5rem 1rem;
+        margin: 0 0.5rem;
+    }
+
+    .contact-form-header .contact-form-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+        line-height: 50px;
+    }
+
+    .contact-form-header h2 {
+        font-size: 1.3rem;
+    }
+
+    .btn-submit,
+    .btn-reset {
+        font-size: 0.95rem;
+        padding: 12px 16px;
+    }
+}

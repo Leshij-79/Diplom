@@ -1,24 +1,142 @@
-
 {% extends 'base.html' %}
-{% block title %}Вход пользователя{% endblock %}
+
+{% load static %}
+
+{% block title %}Вход в личный кабинет - {{ about_company.full_name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
 
 {% block content %}
+<section class="section auth-section">
+    <div class="auth-container">
+        <div class="auth-header">
+            <i class="fas fa-user-circle auth-icon"></i>
+            <h2>Вход в личный кабинет</h2>
+            <p>Введите свои данные для входа в систему</p>
+        </div>
 
-    <div class="container">
-        <div class="col-1">
-        </div>
-        <div class="col-12">
-            <h2>Вход</h2>
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit" class="btn btn-primary">Войти</button>
-                <a role="button" class="btn btn-secondary" href="{% url 'users:password_reset' %}">Восстановить пароль</a>
-            </form>
-        </div>
-        <div class="col-1">
-        </div>
-        {% include 'footer.html' %}
+        <form class="auth-form" method="POST" action="{% url 'users:login' %}" id="loginForm">
+            {% csrf_token %}
+
+            <input type="hidden" name="next" value="{{ next|default:'' }}">
+
+            <!-- Поле Email/Логин -->
+            <div class="form-group">
+                <label for="id_username">
+                    <i class="fas fa-envelope"></i> Email
+                </label>
+                <input type="email" id="id_username" name="username"
+                       placeholder="example@mail.ru"
+                       value="{{ form.username.value|default:'' }}" required>
+            </div>
+
+            <!-- Поле Пароль -->
+            <div class="form-group">
+                <label for="id_password">
+                    <i class="fas fa-lock"></i> Пароль
+                </label>
+                <div class="password-wrapper">
+                    <input type="password" id="id_password" name="password"
+                           placeholder="Введите пароль" required>
+                    <button type="button" class="toggle-password" onclick="togglePassword()">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Забыли пароль? -->
+            <div class="form-options">
+                <button type="button" class="forgot-link-btn" onclick="location.href='/password-reset'">
+                    Забыли пароль?
+                </button>
+            </div>
+
+            <!-- Кнопка Войти -->
+            <button type="submit" class="btn-login">
+                <i class="fas fa-sign-in-alt"></i> Войти
+            </button>
+
+            <!-- Разделитель -->
+            <div class="divider">
+                <span>или</span>
+            </div>
+
+            <!-- Кнопка Зарегистрироваться -->
+            <button type="button" class="btn-register" onclick="location.href='/users/register'">
+                <i class="fas fa-user-plus"></i> Зарегистрироваться
+            </button>
+
+            <!-- Кнопка Восстановить пароль -->
+            <button type="button" class="btn-reset-password" onclick="location.href='/password-reset'">
+                <i class="fas fa-key"></i> Восстановить пароль
+            </button>
+
+            <!-- Сообщение об ошибке от Django -->
+            {% if form.errors %}
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                Неверный email или пароль. Пожалуйста, попробуйте снова.
+            </div>
+            {% endif %}
+
+            <!-- Сообщение об ошибке -->
+            {% if error %}
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ error }}
+            </div>
+            {% endif %}
+        </form>
     </div>
+</section>
 
+<script>
+// Показать/скрыть пароль
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const toggleBtn = document.querySelector('.toggle-password i');
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleBtn.classList.remove('fa-eye');
+        toggleBtn.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleBtn.classList.remove('fa-eye-slash');
+        toggleBtn.classList.add('fa-eye');
+    }
+}
+
+// Валидация формы перед отправкой
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    const username = document.getElementById('id_username').value;
+    const password = document.getElementById('id_password').value;
+
+    // Удаляем старые сообщения об ошибках
+    const oldAlerts = this.querySelectorAll('.alert');
+    oldAlerts.forEach(el => el.remove());
+
+    if (!email || !password) {
+        e.preventDefault();
+
+        // Создаем новое сообщение
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-error';
+        alert.innerHTML = '<i class="fas fa-exclamation-circle"></i> Пожалуйста, заполните все поля';
+
+        // Вставляем перед кнопкой входа
+        const loginBtn = this.querySelector('.btn-login');
+        this.insertBefore(alert, loginBtn);
+
+        // Удаляем сообщение через 5 секунд
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 5000);
+    }
+});
+</script>
 {% endblock %}

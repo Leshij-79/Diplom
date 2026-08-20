@@ -10,9 +10,19 @@ load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS_RAW = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1")
+if ALLOWED_HOSTS_RAW == "*":
+    ALLOWED_HOSTS = ["*"]
+else:
+    ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_RAW.split(",")]
+
+CSRF_TRUSTED_ORIGINS_RAW = os.getenv("CSRF_TRUSTED_ORIGINS", "http://localhost,http://127.0.0.1")
+if CSRF_TRUSTED_ORIGINS_RAW == "*":
+    CSRF_TRUSTED_ORIGINS = ["*"]
+else:
+    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS_RAW.split(",")]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -96,12 +106,12 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, "static"),
 ]
 
 AUTH_USER_MODEL = "users.CustomUser"
@@ -119,10 +129,6 @@ SPECTACULAR_SETTINGS = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8000",
-]
-
-CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
 ]
 
@@ -146,3 +152,14 @@ if CACHE_ENABLED:
             "LOCATION": "redis://127.0.0.1:6379/1",
         }
     }
+
+LOGIN_REDIRECT_URL = "/"
+LOGIN_URL = "/users/login/"
+LOGOUT_REDIRECT_URL = "/"
+
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")  # Например, Redis, который по умолчанию работает на порту 6379
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE

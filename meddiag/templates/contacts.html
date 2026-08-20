@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Контакты - {{ about_company.full_name }}{% endblock %}
+
+{% block content %}
+
+<!-- Контакты -->
+<section class="section" id="contacts">
+    <h2>Контактная информация</h2>
+
+    {% if contacts %}
+        <div class="contact-info">
+            <div class="contact-item">
+                <img src="/static/images/icon-phone.png" alt="Телефон">
+                <div>
+                    <strong>Телефон</strong><br>
+                    {{ contacts.phone }}
+                </div>
+            </div>
+            <div class="contact-item">
+                <img src="/static/images/icon-email.png" alt="Email">
+                <div>
+                    <strong>Email</strong><br>
+                    {{ contacts.email }}
+                </div>
+            </div>
+            <div class="contact-item">
+                <img src="/static/images/icon-location.png" alt="Адрес">
+                <div>
+                    <strong>Адрес</strong><br>
+                    {{ contacts.address }}
+                </div>
+            </div>
+            <div class="contact-item">
+                <img src="/static/images/icon-hours.png" alt="Часы работы">
+                <div>
+                    <strong>Часы работы</strong><br>
+                    {{ contacts.work_days }}: {{ contacts.hour_start }}:00 - {{ contacts.hour_end }}:00<br>
+                    {% if contacts.work_days_second %}
+                        {{ contacts.work_days_second }}: {{ contacts.hour_start_second }}:00 - {{ contacts.hour_end_second }}:00<br>
+                    {% endif %}
+                    {{ contacts.weekend }}: выходной
+                </div>
+            </div>
+        </div>
+
+        {% if contacts.map %}
+            <div style="margin-top: 2rem; border-radius: 12px; overflow: hidden;">
+                <iframe src="https://yandex.ru/map-widget/v1/?um=constructor%{{ contacts.map|safe }}&amp;source=constructor" width="500" height="400" frameborder="0"></iframe>
+            </div>
+        {% endif %}
+
+    {% else %}
+        <div class="contact-info">
+            <div class="contact-item">
+                <img src="/static/images/icon-phone.png" alt="Телефон">
+                <div>
+                    <strong>Телефон</strong><br>
+                    +7 (495) 123-45-67
+                </div>
+            </div>
+            <div class="contact-item">
+                <img src="/static/images/icon-email.png" alt="Email">
+                <div>
+                    <strong>Email</strong><br>
+                    info@meddiagnostic.ru
+                </div>
+            </div>
+            <div class="contact-item">
+                <img src="/static/images/icon-location.png" alt="Адрес">
+                <div>
+                    <strong>Адрес</strong><br>
+                    г. Москва, ул. Медицинская, 10
+                </div>
+            </div>
+            <div class="contact-item">
+                <img src="/static/images/icon-hours.png" alt="Часы работы">
+                <div>
+                    <strong>Часы работы</strong><br>
+                    Пн-Пт: 8:00 - 20:00
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div style="margin-top: 2rem; text-align: center;">
+        <button class="btn-primary" onclick="openContactForm()"
+                style="background: #2e86c1; padding: 0.8rem 2.5rem;">
+            <i class="fas fa-envelope"></i> Связаться с нами
+        </button>
+    </div>
+</section>
+
+<script>
+function openContactForm() {
+    window.location.href = "/contact-form";
+}
+</script>
+{% endblock %}

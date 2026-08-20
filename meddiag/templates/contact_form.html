@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Обратная связь - {{ about_company.full_name|default:"Медицинская Диагностика" }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/contact_form.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="section contact-form-section">
+    <div class="contact-form-container">
+        <div class="contact-form-header">
+            <i class="fas fa-envelope-open-text contact-form-icon"></i>
+            <h2>Обратная связь</h2>
+            <p>Заполните форму, и мы свяжемся с вами в ближайшее время</p>
+        </div>
+
+        <form class="contact-form" method="POST" action="{% url 'meddiag:contact_form' %}" id="contactForm">
+            {% csrf_token %}
+
+            <!-- Имя -->
+            <div class="form-group">
+                <label for="name">
+                    <i class="fas fa-user"></i> Ваше имя <span class="required">*</span>
+                </label>
+                <input type="text" id="name" name="name"
+                       placeholder="Иванов Иван"
+                       value="{% if user.is_authenticated %}{{ user.last_name }} {{ user.first_name }}{% endif %}"
+                       required>
+                {% if form.name.errors %}
+                    <div class="field-error">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label for="email">
+                    <i class="fas fa-envelope"></i> Email <span class="required">*</span>
+                </label>
+                <input type="email" id="email" name="email"
+                       placeholder="example@mail.ru"
+                       value="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
+                       required>
+                {% if form.email.errors %}
+                    <div class="field-error">{{ form.email.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Телефон -->
+            <div class="form-group">
+                <label for="phone">
+                    <i class="fas fa-phone"></i> Телефон
+                </label>
+                <input type="tel" id="phone" name="phone"
+                       placeholder="+7 (999) 123-45-67"
+                       value="{% if user.is_authenticated %}{{ user.phone_number|default:'' }}{% endif %}">
+                {% if form.phone.errors %}
+                    <div class="field-error">{{ form.phone.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Тема -->
+            <div class="form-group">
+                <label for="subject">
+                    <i class="fas fa-tag"></i> Тема обращения <span class="required">*</span>
+                </label>
+                <select id="subject" name="subject" required>
+                    <option value="">Выберите тему</option>
+                    <option value="appointment">Запись на прием</option>
+                    <option value="question">Вопрос по услугам</option>
+                    <option value="complaint">Жалоба или предложение</option>
+                    <option value="cooperation">Сотрудничество</option>
+                    <option value="other">Другое</option>
+                </select>
+                {% if form.subject.errors %}
+                    <div class="field-error">{{ form.subject.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Сообщение -->
+            <div class="form-group">
+                <label for="message">
+                    <i class="fas fa-comment"></i> Сообщение <span class="required">*</span>
+                </label>
+                <textarea id="message" name="message" rows="6"
+                          placeholder="Опишите ваш вопрос или обращение..." required></textarea>
+                {% if form.message.errors %}
+                    <div class="field-error">{{ form.message.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Контактная информация под формой -->
+            <div class="contact-info-block">
+                <div class="info-item">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                        <strong>Телефон</strong>
+                        <p>{% if contacts %}{{ contacts.phone }}{% else %}+7 (495) 123-45-67{% endif %}</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                        <strong>Email</strong>
+                        <p>{% if contacts %}{{ contacts.email }}{% else %}info@meddiagnostic.ru{% endif %}</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <strong>Часы работы</strong>
+                        <p>{% if contacts %}{{ contacts.work_days }}: {{ contacts.hour_start }}:00 - {{ contacts.hour_end }}:00{% else %}Пн-Пт: 8:00 - 20:00{% endif %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопки -->
+            <div class="contact-form-actions">
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-paper-plane"></i> Отправить сообщение
+                </button>
+                <button type="reset" class="btn-reset">
+                    <i class="fas fa-undo"></i> Очистить
+                </button>
+            </div>
+
+            <!-- Сообщения -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %}">
+                        <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% else %}info-circle{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</section>
+
+<script>
+
+// Валидация формы перед отправкой
+document.getElementById('contactForm').addEventListener('submit', function(e) {
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const subject = document.getElementById('subject').value;
+    const message = document.getElementById('message').value.trim();
+
+    // Удаляем старые сообщения
+    const oldAlerts = this.querySelectorAll('.alert');
+    oldAlerts.forEach(el => el.remove());
+
+    let errors = [];
+
+    if (!name) errors.push('Пожалуйста, укажите ваше имя.');
+    if (!email) errors.push('Пожалуйста, укажите ваш email.');
+    if (!subject) errors.push('Пожалуйста, выберите тему обращения.');
+    if (!message) errors.push('Пожалуйста, напишите сообщение.');
+    if (!captcha) errors.push('Пожалуйста, введите код защиты.');
+
+    // Проверка email
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errors.push('Пожалуйста, введите корректный email адрес.');
+    }
+
+    // Проверка телефона (если заполнен)
+    const phone = document.getElementById('phone').value.trim();
+    if (phone && !/^[\d\s()+-]+$/.test(phone)) {
+        errors.push('Пожалуйста, введите корректный номер телефона.');
+    }
+
+    if (errors.length > 0) {
+        e.preventDefault();
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-error';
+        alert.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + errors.join(' ');
+        const actions = this.querySelector('.contact-form-actions');
+        this.insertBefore(alert, actions);
+    }
+});
+
+// Автоматическое заполнение для авторизованных пользователей
+document.addEventListener('DOMContentLoaded', function() {
+    {% if user.is_authenticated %}
+        const nameField = document.getElementById('name');
+        const emailField = document.getElementById('email');
+        const phoneField = document.getElementById('phone');
+
+        if (nameField && !nameField.value) {
+            nameField.value = '{{ user.last_name }} {{ user.first_name }}';
+        }
+        if (emailField && !emailField.value) {
+            emailField.value = '{{ user.email }}';
+        }
+        if (phoneField && !phoneField.value) {
+            phoneField.value = '{{ user.phone_number|default:"" }}';
+        }
+    {% endif %}
+});
+</script>
+{% endblock %}
