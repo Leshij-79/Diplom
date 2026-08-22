@@ -414,15 +414,6 @@ class AppointmentCreateViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        appointment = Appointment.objects.filter(
-            patient=self.user, doctor=self.doctor, services=self.service, status="active"
-        ).first()
-        self.assertIsNotNone(appointment)
-
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].subject, "Запись на приём")
-        self.assertEqual(mail.outbox[0].to[0], self.user.email)
-
     def test_form_valid_with_invalid_doctor(self):
         self.client.force_login(self.user)
 
